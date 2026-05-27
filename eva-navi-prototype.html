@@ -1,0 +1,964 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>EVA Navi — Prototype</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   TOKENS — Eva Surgica brand
+   ========================================================================== */
+:root{
+  --bg-0:#0F0F0F; --bg-1:#1D1D1D; --bg-2:#262626; --bg-3:#333333; --bg-4:#404040;
+  --bd-subtle:rgba(255,255,255,.05); --bd-default:rgba(255,255,255,.09); --bd-strong:rgba(255,255,255,.18);
+  --tx-primary:#F3F3F3; --tx-secondary:#A0A0A4; --tx-tertiary:#6B6B70; --tx-disabled:#454548;
+
+  --brand:#00E6E6; --brand-bright:#33EFEF; --brand-deep:#00B8B8;
+  --brand-tint:rgba(0,230,230,.14); --brand-glow:rgba(0,230,230,.40);
+  --brand-blue:#789FD6; --brand-blue-tint:rgba(120,159,214,.16);
+  --brand-magenta:#C666C7; --brand-magenta-tint:rgba(198,102,199,.16);
+  --acc-yellow:#FEBD09; --acc-yellow-tint:rgba(254,189,9,.14);
+  --acc-salmon:#DD8A7A; --acc-salmon-tint:rgba(221,138,122,.14);
+
+  --ok:#3CC505; --ok-tint:rgba(60,197,5,.14);
+  --warn:#F19E14; --warn-tint:rgba(241,158,20,.14);
+  --danger:#FF5F67; --danger-tint:rgba(255,95,103,.14);
+  --neutral:#90939A; --neutral-tint:rgba(144,147,154,.14);
+
+  --brand-gradient:linear-gradient(135deg,var(--brand) 0%,var(--brand-blue) 50%,var(--brand-magenta) 100%);
+
+  --f-sans:'IBM Plex Sans',ui-sans-serif,system-ui,sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,monospace;
+  --r-sm:4px; --r-md:6px; --r-lg:10px; --r-xl:14px;
+  --sh-1:0 1px 2px rgba(0,0,0,.4);
+  --sh-2:0 4px 12px rgba(0,0,0,.4);
+  --sh-3:0 12px 32px rgba(0,0,0,.55);
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%;overflow:hidden;background:var(--bg-0);color:var(--tx-primary);font-family:var(--f-sans);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;background:none;border:0;padding:0;cursor:pointer;color:inherit}
+input{font-family:inherit}
+
+/* ==========================================================================
+   APP SHELL
+   ========================================================================== */
+.app{display:grid;grid-template-rows:56px 1fr;height:100vh;background:var(--bg-0)}
+
+/* ==========================================================================
+   TOPBAR
+   ========================================================================== */
+.topbar{
+  display:grid;
+  grid-template-columns:200px 1fr auto auto auto auto auto;
+  align-items:center;gap:24px;padding:0 16px 0 20px;
+  background:var(--bg-1);border-bottom:1px solid var(--bd-default);position:relative;
+}
+.topbar::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,var(--brand),transparent);opacity:.35}
+.brand{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.brand-name small{display:block;font-family:var(--f-mono);font-size:10px;color:var(--tx-secondary);font-weight:400;letter-spacing:.1em}
+
+.tb-group{display:flex;align-items:center;gap:8px;padding:0 14px;border-left:1px solid var(--bd-subtle);height:32px}
+.tb-label{font-family:var(--f-mono);font-size:10px;color:var(--tx-tertiary);text-transform:uppercase;letter-spacing:.12em}
+
+.tb-patient{display:flex;flex-direction:column;justify-content:center;line-height:1.25}
+.tb-patient .name{font-size:13.5px;font-weight:600;color:var(--tx-primary)}
+.tb-patient .id{font-family:var(--f-mono);font-size:11px;color:var(--tx-secondary)}
+
+.tb-marker{width:28px;height:28px;border-radius:var(--r-md);background:var(--bg-2);border:1px solid var(--bd-default);display:grid;place-items:center;font-family:var(--f-mono);font-size:11px;font-weight:600;color:var(--tx-secondary);position:relative;cursor:pointer;transition:all .15s ease}
+.tb-marker:hover{border-color:var(--bd-strong);color:var(--tx-primary)}
+.tb-marker.is-active{color:var(--brand);border-color:var(--brand);box-shadow:0 0 0 1px var(--brand-tint)}
+.tb-marker .dot{position:absolute;top:-2px;right:-2px;width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 2px var(--bg-1)}
+
+.tb-hw{display:flex;gap:6px;align-items:center}
+.tb-hw-item{display:flex;align-items:center;gap:6px;padding:5px 9px 5px 7px;border-radius:999px;background:var(--bg-2);border:1px solid var(--bd-subtle);font-size:11px;color:var(--tx-secondary);font-family:var(--f-mono);letter-spacing:.02em}
+.tb-hw-item .status{width:7px;height:7px;border-radius:50%;background:var(--tx-disabled)}
+.tb-hw-item.is-ok .status{background:var(--ok);box-shadow:0 0 6px var(--ok)}
+.tb-hw-item.is-warn .status{background:var(--warn)}
+.tb-hw-item.is-err .status{background:var(--danger)}
+.tb-hw-item.is-ok{color:var(--tx-primary)}
+
+.tb-action{width:36px;height:36px;border-radius:var(--r-md);background:transparent;border:1px solid transparent;color:var(--tx-secondary);display:grid;place-items:center;cursor:pointer;transition:all .15s ease}
+.tb-action:hover{background:var(--bg-2);color:var(--tx-primary)}
+.tb-action.is-on{background:var(--brand-tint);color:var(--brand);border-color:rgba(0,230,230,.3)}
+.tb-action.is-danger:hover{background:var(--danger-tint);color:var(--danger);border-color:rgba(255,95,103,.3)}
+
+.tb-toggle-23d{display:flex;background:var(--bg-2);border:1px solid var(--bd-default);border-radius:var(--r-md);padding:2px;height:32px}
+.tb-toggle-23d button{background:transparent;border:none;color:var(--tx-secondary);font-family:var(--f-mono);font-size:11px;font-weight:600;letter-spacing:.05em;padding:0 12px;border-radius:4px;cursor:pointer;height:100%}
+.tb-toggle-23d button.is-active{background:var(--brand);color:#0A0A0A;box-shadow:0 1px 0 rgba(255,255,255,.15) inset}
+
+/* ==========================================================================
+   BODY: SIDEBAR + STAGE
+   ========================================================================== */
+.body{display:grid;grid-template-columns:84px 1fr;min-height:0}
+
+.sidebar{background:var(--bg-1);border-right:1px solid var(--bd-default);display:flex;flex-direction:column;padding:18px 0}
+.sb-group{display:flex;flex-direction:column;gap:4px;padding:0 12px}
+.sb-divider{height:1px;background:var(--bd-default);margin:14px 16px;position:relative}
+.sb-divider::after{content:"SETUP";position:absolute;left:0;top:-7px;font-family:var(--f-mono);font-size:9px;color:var(--tx-tertiary);letter-spacing:.18em;background:var(--bg-1);padding-right:6px}
+.sb-divider.viz::after{content:"VIEWS"}
+
+.sb-item{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border-radius:var(--r-md);color:var(--tx-secondary);cursor:pointer;transition:all .15s ease;border:1px solid transparent;position:relative;background:transparent;font-family:inherit}
+.sb-item:hover{background:var(--bg-2);color:var(--tx-primary)}
+.sb-item.is-active{background:var(--brand-tint);color:var(--brand);border-color:rgba(0,230,230,.25)}
+.sb-item.is-active::before{content:"";position:absolute;left:-13px;top:50%;transform:translateY(-50%);width:3px;height:24px;background:var(--brand);border-radius:0 2px 2px 0;box-shadow:0 0 8px var(--brand-glow)}
+.sb-item span{font-size:10.5px;font-weight:500;letter-spacing:.02em}
+.sb-bottom{margin-top:auto;padding:0 12px;display:flex;flex-direction:column;gap:4px}
+.sb-item-danger{color:var(--danger)!important}
+.sb-item-danger:hover{background:var(--danger-tint)!important;color:var(--danger)!important}
+
+/* ==========================================================================
+   STAGE — screens swap here
+   ========================================================================== */
+.stage{position:relative;min-width:0;overflow:hidden;background:var(--bg-0)}
+.screen{position:absolute;inset:0;display:none;animation:fadeIn .25s ease}
+.screen.is-active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* ==========================================================================
+   BUTTONS (used by all screens)
+   ========================================================================== */
+.btn{font-family:var(--f-sans);font-size:13px;font-weight:500;letter-spacing:-.002em;padding:8px 14px;border-radius:var(--r-md);border:1px solid transparent;cursor:pointer;transition:all .15s ease;display:inline-flex;align-items:center;gap:8px;line-height:1;white-space:nowrap}
+.btn-primary{background:var(--brand);color:#0A0A0A;font-weight:600;box-shadow:0 1px 0 rgba(255,255,255,.15) inset,0 2px 8px rgba(0,230,230,.25)}
+.btn-primary:hover{background:var(--brand-bright);box-shadow:0 1px 0 rgba(255,255,255,.2) inset,0 4px 14px rgba(0,230,230,.4)}
+.btn-secondary{background:var(--bg-3);color:var(--tx-primary);border-color:var(--bd-default)}
+.btn-secondary:hover{background:var(--bg-4);border-color:var(--bd-strong)}
+.btn-ghost{background:transparent;color:var(--tx-secondary);border-color:transparent}
+.btn-ghost:hover{background:var(--bg-2);color:var(--tx-primary)}
+.btn-danger{background:transparent;color:var(--danger);border-color:rgba(255,95,103,.3)}
+.btn-danger:hover{background:var(--danger-tint);border-color:var(--danger)}
+.btn-icon{padding:8px;width:34px;height:34px;justify-content:center}
+.btn-lg{padding:12px 18px;font-size:14px;border-radius:var(--r-md)}
+.btn-sm{padding:6px 10px;font-size:12px}
+
+/* Pills */
+.pill{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;font-family:var(--f-mono);font-size:11px;font-weight:500;letter-spacing:.02em;border:1px solid}
+.pill .dot{width:7px;height:7px;border-radius:50%}
+.pill-ok{background:var(--ok-tint);color:var(--ok);border-color:rgba(60,197,5,.3)} .pill-ok .dot{background:var(--ok);box-shadow:0 0 6px var(--ok)}
+.pill-warn{background:var(--warn-tint);color:var(--warn);border-color:rgba(241,158,20,.3)} .pill-warn .dot{background:var(--warn)}
+.pill-idle{background:var(--bg-3);color:var(--tx-tertiary);border-color:var(--bd-default)} .pill-idle .dot{background:var(--tx-tertiary)}
+
+/* ==========================================================================
+   SCREEN: OPERATING VIEW (4-pane DICOM)
+   ========================================================================== */
+.opview{display:grid;grid-template-columns:320px 1fr;height:100%;background:var(--bg-0)}
+
+.panel{background:linear-gradient(180deg,var(--bg-1) 0%,var(--bg-0) 100%);border-right:1px solid var(--bd-default);overflow-y:auto;display:flex;flex-direction:column}
+.panel-header{display:flex;align-items:center;gap:10px;padding:18px 20px 14px;border-bottom:1px solid var(--bd-subtle)}
+.panel-header .ico{width:30px;height:30px;border-radius:var(--r-md);background:var(--brand-tint);color:var(--brand);display:grid;place-items:center}
+.panel-title{margin:0;font-size:14.5px;font-weight:600;letter-spacing:-.005em}
+.panel-title small{display:block;font-size:11px;color:var(--tx-tertiary);font-weight:400;font-family:var(--f-mono);letter-spacing:.05em;margin-top:1px}
+
+.panel-section{padding:18px 20px;border-bottom:1px solid var(--bd-subtle)}
+.panel-section:last-child{border-bottom:none}
+.panel-section-label{font-family:var(--f-mono);font-size:10px;color:var(--tx-tertiary);text-transform:uppercase;letter-spacing:.16em;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.panel-section-label .count{color:var(--brand);background:var(--brand-tint);padding:1px 6px;border-radius:999px;font-size:9.5px}
+
+/* DICOM list — search + groups + refined items */
+.dicom-list{display:flex;flex-direction:column;gap:2px}
+
+.dicom-item{
+  display:flex;align-items:center;gap:14px;
+  padding:11px 12px;
+  border-radius:var(--r-md);
+  background:transparent;border:none;
+  font-family:var(--f-mono);font-size:12.5px;
+  color:var(--tx-secondary);
+  width:100%;text-align:left;cursor:pointer;
+  transition:background .12s ease;
+}
+.dicom-item .seq{color:var(--tx-tertiary);min-width:36px;letter-spacing:.04em}
+.dicom-item .name{letter-spacing:.01em}
+.dicom-item:hover{background:var(--bg-2);color:var(--tx-primary)}
+.dicom-item:hover .seq{color:var(--tx-secondary)}
+.dicom-item.is-active{background:rgba(0,140,130,.28);color:var(--brand)}
+.dicom-item.is-active .seq{color:var(--brand)}
+
+.models-tree{display:flex;flex-direction:column;gap:2px}
+.model-group{display:flex;flex-direction:column}
+.model-group-header{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--r-sm);font-size:12px;font-weight:600;color:var(--tx-primary);cursor:pointer;background:transparent;border:none;font-family:inherit;width:100%;text-align:left}
+.model-group-header:hover{background:var(--bg-2)}
+.model-group-header .chev{transition:transform .15s ease;color:var(--tx-tertiary)}
+.model-group.is-collapsed .chev{transform:rotate(-90deg)}
+.model-group-header .grp-count{margin-left:auto;font-family:var(--f-mono);font-size:10.5px;color:var(--tx-tertiary);font-weight:400}
+.model-group-items{display:flex;flex-direction:column;gap:1px;padding-left:8px;transition:max-height .2s ease,opacity .15s ease;overflow:hidden}
+.model-group.is-collapsed .model-group-items{max-height:0;opacity:0}
+
+.model-item{display:grid;grid-template-columns:18px 1fr auto auto;align-items:center;gap:10px;padding:7px 10px;border-radius:var(--r-sm);cursor:pointer;font-size:12px;color:var(--tx-secondary);background:transparent;border:none;font-family:inherit;width:100%;text-align:left}
+.model-item:hover{background:var(--bg-2);color:var(--tx-primary)}
+.model-item .swatch{width:10px;height:10px;border-radius:2px;border:1px solid rgba(255,255,255,.15)}
+.model-item.is-on{color:var(--tx-primary)}
+.model-item .eye{color:var(--tx-tertiary);opacity:.6}
+.model-item.is-on .eye{color:var(--brand);opacity:1}
+.model-item .opacity-mini{font-family:var(--f-mono);font-size:10px;color:var(--tx-tertiary)}
+
+.tp-block{padding:18px 20px;border-top:1px solid var(--bd-subtle)}
+.tp-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.tp-label{font-size:12px;font-weight:500}
+.tp-val{font-family:var(--f-mono);font-size:13px;color:var(--brand);font-weight:600}
+.tp-slider{height:6px;background:var(--bg-3);border-radius:999px;position:relative;cursor:pointer}
+.tp-slider .fill{position:absolute;left:0;top:0;bottom:0;width:62%;background:linear-gradient(90deg,var(--brand-deep),var(--brand));border-radius:999px;box-shadow:0 0 12px var(--brand-glow)}
+.tp-slider .knob{position:absolute;left:62%;top:50%;transform:translate(-50%,-50%);width:16px;height:16px;border-radius:50%;background:var(--tx-primary);border:2px solid var(--brand);box-shadow:var(--sh-2)}
+
+/* Viewport 4-pane */
+.viewport{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:1px;background:var(--bd-default);position:relative;overflow:hidden;height:100%}
+.pane{background:#000;position:relative;overflow:hidden}
+.pane-label{position:absolute;top:10px;left:12px;font-family:var(--f-mono);font-size:10px;color:var(--tx-secondary);text-transform:uppercase;letter-spacing:.16em;background:rgba(0,0,0,.6);padding:3px 8px;border-radius:3px;border:1px solid var(--bd-subtle);z-index:2}
+.pane-meta{position:absolute;bottom:10px;right:12px;font-family:var(--f-mono);font-size:10px;color:var(--tx-tertiary);background:rgba(0,0,0,.6);padding:3px 8px;border-radius:3px}
+
+/* Pane expand button */
+.pane-expand{position:absolute;top:8px;right:10px;width:26px;height:26px;border-radius:var(--r-sm);background:rgba(0,0,0,.55);border:1px solid var(--bd-subtle);color:var(--tx-tertiary);display:none;place-items:center;cursor:pointer;z-index:3;transition:all .15s ease}
+.pane:hover .pane-expand{display:grid}
+.pane-expand:hover{background:var(--bg-3);border-color:var(--bd-strong);color:var(--tx-primary)}
+
+/* Maximized pane */
+.pane.is-maximized{grid-column:1/-1;grid-row:1/-1;z-index:4}
+.viewport.has-maximized .pane:not(.is-maximized){display:none}
+.pane.is-maximized .pane-expand{display:grid}
+.pane-content{width:100%;height:100%;display:grid;place-items:center}
+.anatomy{position:absolute;inset:0;display:grid;place-items:center;background:radial-gradient(circle at 50% 40%,rgba(0,230,230,.08),transparent 60%)}
+.anatomy-svg{filter:drop-shadow(0 0 24px rgba(0,230,230,.25))}
+.crosshair{position:absolute;background:rgba(255,255,255,.15);pointer-events:none}
+.crosshair.h{left:0;right:0;height:1px;top:50%}
+.crosshair.v{top:0;bottom:0;width:1px;left:50%}
+.crosshair.red{background:rgba(255,95,103,.4)}
+.crosshair.green{background:rgba(60,197,5,.4)}
+
+/* ==========================================================================
+   SCREEN: CALIBRATION
+   ========================================================================== */
+.calib{display:grid;grid-template-rows:auto 1fr auto;height:100%;background:var(--bg-0)}
+
+.stepper{display:flex;align-items:center;gap:0;padding:20px 28px;background:linear-gradient(180deg,var(--bg-1),var(--bg-0));border-bottom:1px solid var(--bd-subtle)}
+.step{display:flex;align-items:center;gap:10px;color:var(--tx-tertiary);font-size:12px}
+.step + .step-connector{flex:1;height:1px;background:var(--bd-default);margin:0 14px;min-width:24px;position:relative}
+.step-connector.is-done{background:var(--brand)}
+.step-circle{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--bd-default);display:grid;place-items:center;font-family:var(--f-mono);font-size:11px;font-weight:600;color:var(--tx-tertiary);background:var(--bg-1)}
+.step.is-done .step-circle{background:var(--brand);border-color:var(--brand);color:#0A0A0A}
+.step.is-current .step-circle{border-color:var(--brand);color:var(--brand);background:var(--brand-tint);box-shadow:0 0 0 4px rgba(0,230,230,.1)}
+.step.is-done{color:var(--tx-secondary)}
+.step.is-current{color:var(--tx-primary);font-weight:600}
+.step-label{font-size:12px}
+
+.calib-stage{position:relative;overflow:hidden;background:radial-gradient(800px 500px at 50% 40%,rgba(0,230,230,.06),transparent 60%),var(--bg-0)}
+.calib-anatomy{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:320px;height:480px}
+
+.pointer-status{position:absolute;top:24px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:12px;background:rgba(13,18,24,.85);backdrop-filter:blur(8px);border:1px solid var(--warn);border-radius:999px;padding:8px 16px 8px 12px;box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 0 1px rgba(241,158,20,.2),0 0 20px rgba(241,158,20,.2)}
+.pointer-status .ico{width:22px;height:22px;border-radius:50%;background:var(--warn-tint);color:var(--warn);display:grid;place-items:center}
+.pointer-status .txt{font-size:13px;font-weight:500}
+.pointer-status .txt small{display:block;font-family:var(--f-mono);font-size:10.5px;color:var(--tx-secondary);font-weight:400;letter-spacing:.04em}
+
+.calib-points{position:absolute;inset:0;pointer-events:none}
+.cp{position:absolute;width:32px;height:32px;border-radius:50%;border:2px solid var(--tx-tertiary);background:rgba(0,0,0,.5);display:grid;place-items:center;font-family:var(--f-mono);font-size:12px;font-weight:600;color:var(--tx-tertiary)}
+.cp.done{background:var(--brand);border-color:var(--brand);color:#0A0A0A;box-shadow:0 0 16px var(--brand-glow)}
+.cp.current{border-color:var(--acc-yellow);color:var(--acc-yellow);background:rgba(254,189,9,.15);animation:pulseRing 1.6s infinite}
+@keyframes pulseRing{0%,100%{box-shadow:0 0 0 0 rgba(254,189,9,.6)}50%{box-shadow:0 0 0 10px rgba(254,189,9,0)}}
+
+.calib-info{position:absolute;left:32px;top:32px;width:280px;display:flex;flex-direction:column;gap:14px}
+.calib-info-card{background:rgba(13,18,24,.7);backdrop-filter:blur(8px);border:1px solid var(--bd-default);border-radius:var(--r-lg);padding:18px}
+.calib-info-card .lbl{font-family:var(--f-mono);font-size:10px;color:var(--brand);letter-spacing:.16em;text-transform:uppercase;margin-bottom:10px}
+.calib-info-card .ttl{font-size:15px;font-weight:600;letter-spacing:-.005em;margin-bottom:6px}
+.calib-info-card .desc{font-size:12.5px;color:var(--tx-secondary);line-height:1.5;margin-bottom:14px}
+.calib-info-card .timer{display:flex;gap:8px;align-items:center;font-family:var(--f-mono);font-size:11px;color:var(--tx-tertiary)}
+
+.calib-footer{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;padding:18px 28px;background:var(--bg-1);border-top:1px solid var(--bd-default)}
+.calib-progress{display:flex;align-items:center;gap:14px}
+.calib-progress-text{font-size:13px}
+.calib-progress-text strong{color:var(--brand);font-family:var(--f-mono);font-weight:600;font-size:14px}
+.calib-progress-text .sub{display:block;font-size:11.5px;color:var(--tx-secondary);margin-top:2px}
+.calib-progress-bar{width:140px;height:4px;background:var(--bg-3);border-radius:999px;overflow:hidden}
+.calib-progress-bar .fill{height:100%;width:50%;background:linear-gradient(90deg,var(--brand-deep),var(--brand));border-radius:999px;box-shadow:0 0 10px var(--brand-glow)}
+.calib-actions{display:flex;gap:8px;align-items:center}
+
+/* ==========================================================================
+   ASSISTANT (floating)
+   ========================================================================== */
+.assistant{
+  position:absolute;top:16px;right:16px;width:320px;
+  background:linear-gradient(var(--bg-1),var(--bg-1)) padding-box,
+             var(--brand-gradient) border-box;
+  border:1.5px solid transparent;
+  border-radius:var(--r-lg);
+  box-shadow:var(--sh-3);
+  z-index:10;
+}
+.ast-body{padding:22px 22px 20px}
+.ast-title{font-family:var(--f-mono);font-size:15px;font-weight:600;color:var(--tx-primary);margin-bottom:14px}
+.ast-msg{font-size:14px;color:var(--tx-secondary);line-height:1.6;margin:0 0 20px}
+.ast-actions{display:flex;align-items:center;gap:16px}
+
+/* ==========================================================================
+   MODAL (Patient Data)
+   ========================================================================== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:1000;animation:fadeIn .2s ease}
+.modal-overlay.is-open{display:flex}
+
+.form-modal{background:var(--bg-1);border:1px solid var(--bd-default);border-radius:var(--r-lg);box-shadow:var(--sh-3);width:680px;max-width:calc(100vw - 48px);max-height:calc(100vh - 96px);overflow:hidden;display:flex;flex-direction:column;animation:slideUp .25s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+
+.form-modal-header{display:flex;align-items:center;gap:14px;padding:20px 24px;border-bottom:1px solid var(--bd-subtle)}
+.form-modal-header .ico{width:36px;height:36px;border-radius:var(--r-md);background:var(--brand-tint);color:var(--brand);display:grid;place-items:center}
+.form-modal-header .ttl{font-size:15px;font-weight:600}
+.form-modal-header .sub{font-size:12px;color:var(--tx-secondary);font-family:var(--f-mono);margin-top:2px}
+.form-modal-body{padding:24px;display:grid;grid-template-columns:200px 1fr;gap:24px;overflow-y:auto;flex:1;min-height:0}
+
+.form-list{display:flex;flex-direction:column;gap:1px}
+.form-list-item{padding:9px 12px;font-family:var(--f-mono);font-size:11.5px;color:var(--tx-secondary);border-radius:var(--r-sm);cursor:pointer;display:flex;justify-content:space-between;align-items:center;background:transparent;border:none;font-family:var(--f-mono);width:100%;text-align:left}
+.form-list-item:hover{background:var(--bg-2);color:var(--tx-primary)}
+.form-list-item.is-active{background:var(--brand-tint);color:var(--brand)}
+.form-list-item .badge{font-size:9.5px;background:var(--bg-3);color:var(--tx-tertiary);padding:1px 6px;border-radius:999px}
+.form-list-item.is-active .badge{background:rgba(0,230,230,.2);color:var(--brand)}
+
+.form-fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-fields .full{grid-column:1/-1}
+.input-group{display:flex;flex-direction:column;gap:6px;width:100%}
+.input-label{font-family:var(--f-mono);font-size:10.5px;color:var(--tx-tertiary);text-transform:uppercase;letter-spacing:.14em}
+.input{background:var(--bg-2);border:1px solid var(--bd-default);border-radius:var(--r-md);padding:10px 12px;font-family:var(--f-sans);font-size:13px;color:var(--tx-primary);width:100%;transition:border .15s ease,background .15s ease}
+.input:focus{outline:none;border-color:var(--brand);background:var(--bg-1);box-shadow:0 0 0 3px var(--brand-tint)}
+.input::placeholder{color:var(--tx-tertiary)}
+
+.select{position:relative;background:var(--bg-2);border:1px solid var(--bd-default);border-radius:var(--r-md);padding:10px 36px 10px 12px;font-size:13px;color:var(--tx-primary);cursor:pointer;width:100%;font-family:var(--f-sans)}
+.select::after{content:"";position:absolute;right:12px;top:50%;width:8px;height:8px;border-right:1.5px solid var(--tx-secondary);border-bottom:1.5px solid var(--tx-secondary);transform:translateY(-70%) rotate(45deg)}
+.select:hover{border-color:var(--bd-strong)}
+
+.form-modal-footer{display:flex;justify-content:space-between;align-items:center;padding:16px 24px;border-top:1px solid var(--bd-subtle);background:var(--bg-0)}
+.form-modal-footer .left{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--tx-secondary)}
+.form-modal-footer .right{display:flex;gap:8px}
+
+
+
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ============= TOPBAR ============= -->
+  <div class="topbar">
+    <div class="brand">
+      <svg width="56" height="21" viewBox="0 0 67 25" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.2679 24.4571C8.02289 24.4571 6.26503 22.9145 5.27359 20.464C4.46205 18.4678 4.19191 15.881 4.1468 13.1131H22.0401C22.0852 8.16733 20.192 5.30862 16.947 3.99253C17.6232 5.80769 17.8482 7.94022 17.8933 10.1636H4.19191C4.28215 7.80395 4.50716 5.76226 5.13824 4.03795C2.028 5.26377 0 7.80453 0 12.2513C0 16.698 2.028 19.2842 5.27359 20.464C6.94122 21.0539 9.01433 21.3259 11.2679 21.3259C13.116 21.3259 15.2342 21.1442 17.2171 20.5089C19.5158 19.7373 21.4536 18.3309 21.9493 16.0621H17.758C17.7128 17.741 17.5775 19.2836 17.2171 20.5089C16.4958 22.9594 14.8282 24.4566 11.2679 24.4566V24.4571ZM5.13824 4.03853C6.03944 1.58804 7.7973 0 11.2228 0C14.2879 0 16.0452 1.67889 16.947 3.99311C15.3245 3.35777 13.3861 3.08582 11.2228 3.08582C8.92409 3.08582 6.85098 3.35835 5.13824 4.03853ZM34.6147 24.8205C33.2178 24.8205 32.7666 23.8678 32.5416 22.6426L28.3046 0.544488H24.5187L27.6284 15.3825C28.2143 18.105 29.882 19.8747 32.1355 20.6463C32.902 20.8734 33.758 21.0091 34.6147 21.0091C35.4714 21.0091 36.3274 20.8728 37.0939 20.6463C39.3475 19.8747 41.0151 18.1055 41.601 15.3825L44.7107 0.544488H40.9249L36.6884 22.6426C36.4628 23.8678 35.8774 24.8205 34.6153 24.8205H34.6147ZM55.4823 24.4571C59.6742 24.4571 61.5669 21.5076 62.5583 18.2861H62.6486V23.9126H66.7051V23.731C66.4344 21.8704 66.3899 19.1934 66.3899 16.0627V9.43799C66.3899 5.94395 64.9021 4.31049 62.5583 3.58488C62.6034 3.90226 62.6486 4.40133 62.6486 4.85555C62.6486 7.94137 60.8462 9.48399 58.6371 10.6184L56.8798 11.5257L62.6486 10.7087V17.787C61.4767 19.7384 58.8176 21.5984 53.9049 21.5984C53.0037 21.5984 52.0117 21.5076 50.9752 21.2356C51.4258 23.187 52.6879 24.4571 55.4823 24.4571ZM47.0088 16.9251C47.0088 14.2481 48.8569 12.6601 52.327 12.161L56.8793 11.5257L55.9775 11.9793C53.2282 13.3857 50.7947 15.2008 50.7947 19.3756C50.7947 20.011 50.8398 20.6463 50.9752 21.2362C48.8569 20.6463 47.0088 19.3756 47.0088 16.9257V16.9251ZM47.6399 7.84995H51.6514C51.6514 6.17106 51.7416 4.71928 52.0117 3.58488C49.6228 4.22022 47.6399 5.49088 47.6399 7.84995ZM52.0117 3.58488C52.5977 1.27066 54.0848 0 57.3755 0C60.4852 0 62.1528 0.952711 62.5583 3.58488C61.0712 3.08582 59.2682 2.99497 57.2853 2.99497C55.6177 2.99497 53.7245 3.13124 52.0117 3.58488Z" fill="white"/></svg>
+      <div class="brand-name"><small>NAVI / 2.0.0</small></div>
+    </div>
+
+    <div class="tb-patient">
+      <div class="name">Peppa Pig</div>
+      <div class="id">ID 202507-8077 · 02 May 2026 · <span id="clock">14:26</span></div>
+    </div>
+
+    <div class="tb-group">
+      <span class="tb-label">Tools</span>
+      <div style="display:flex;gap:6px">
+        <button class="tb-marker is-active" data-marker="C" title="Camera visible">C<span class="dot"></span></button>
+        <button class="tb-marker" data-marker="P" title="Pointer hidden">P</button>
+        <button class="tb-marker" data-marker="E" title="Endoscope hidden">E</button>
+      </div>
+    </div>
+
+    <div class="tb-hw">
+      <div class="tb-hw-item is-ok"><span class="status"></span>CAM</div>
+      <div class="tb-hw-item is-ok"><span class="status"></span>MIC</div>
+      <div class="tb-hw-item is-warn"><span class="status"></span>PEDAL</div>
+      <div class="tb-hw-item is-ok"><span class="status"></span>3DM</div>
+    </div>
+
+    <div class="tb-toggle-23d">
+      <button class="is-active" data-mode="2D">2D</button>
+      <button data-mode="3D">3D</button>
+    </div>
+
+    <button class="tb-action is-on" id="ast-toggle-top" title="Toggle assistant">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 4h10v6H8l-3 3v-3H3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+    </button>
+
+  </div>
+
+  <!-- ============= BODY ============= -->
+  <div class="body">
+
+    <!-- Sidebar (interactive) -->
+    <nav class="sidebar">
+      <div class="sb-group">
+        <button class="sb-item" data-action="open-patient">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="7" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M4 17a6 6 0 0 1 12 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <span>Patient</span>
+        </button>
+        <button class="sb-item" data-screen="calibration">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2v3M10 15v3M2 10h3M15 10h3M4.5 4.5l2 2M13.5 13.5l2 2M4.5 15.5l2-2M13.5 6.5l2-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.5"/></svg>
+          <span>Config</span>
+        </button>
+        <button class="sb-item" data-screen="opview">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="6" stroke="currentColor" stroke-width="1.5"/><circle cx="10" cy="10" r="1.5" fill="currentColor"/></svg>
+          <span>System</span>
+        </button>
+      </div>
+
+      <div class="sb-divider viz"></div>
+
+      <div class="sb-group">
+        <button class="sb-item is-active" data-screen="opview">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="6" width="11" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M14 9l3-2v6l-3-2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          <span>Cam</span>
+        </button>
+        <button class="sb-item" data-screen="opview">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 3l6 12H4z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          <span>VR</span>
+        </button>
+        <button class="sb-item" data-screen="opview">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 3l6 3.5v7L10 17l-6-3.5v-7z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 3v14M4 6.5l6 3.5 6-3.5" stroke="currentColor" stroke-width="1.5"/></svg>
+          <span>AR</span>
+        </button>
+      </div>
+
+      <div class="sb-bottom">
+<button class="sb-item sb-item-danger">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 3v7M6 5.5a6 6 0 1 0 8 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <span>Power</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Stage with screens -->
+    <main class="stage">
+
+      <!-- ================ SCREEN 1: OPERATING VIEW ================ -->
+      <section class="screen is-active" data-screen="opview">
+        <div class="opview">
+
+          <!-- Data panel -->
+          <aside class="panel">
+            <div class="panel-header">
+              <div class="ico">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="6" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M3 14a5 5 0 0 1 10 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </div>
+              <div>
+                <h3 class="panel-title">Patient data</h3>
+                <small>Peppa Pig · 202507-8077</small>
+              </div>
+            </div>
+
+            <div class="panel-section">
+              <div class="panel-section-label"><span>DICOM series</span><span class="count">9</span></div>
+
+              <div class="dicom-list" id="dicom-list">
+                <button class="dicom-item"><span class="seq">T20F</span><span class="name">Topogram LL 0.6</span></button>
+                <button class="dicom-item"><span class="seq">T20F</span><span class="name">Topogram AP 0.6</span></button>
+                <button class="dicom-item is-active"><span class="seq">B31S</span><span class="name">TB mollio 2.0</span></button>
+                <button class="dicom-item"><span class="seq">B41S</span><span class="name">PreMonitoring 10.0</span></button>
+                <button class="dicom-item"><span class="seq">B41S</span><span class="name">PreMonitoring 10.0</span></button>
+                <button class="dicom-item"><span class="seq">B41S</span><span class="name">PreMonitoring 10.0</span></button>
+                <button class="dicom-item"><span class="seq">B41S</span><span class="name">PreMonitoring 10.0</span></button>
+                <button class="dicom-item"><span class="seq">B41S</span><span class="name">PreMonitoring 10.0</span></button>
+                <button class="dicom-item"><span class="seq">B41S</span><span class="name">PreMonitoring 10.0</span></button>
+              </div>
+            </div>
+
+            <div class="panel-section">
+              <div class="panel-section-label"><span>3D models</span><span class="count" id="models-count">8</span></div>
+              <div class="models-tree" id="models-tree">
+
+                <div class="model-group">
+                  <button class="model-group-header">
+                    <svg class="chev" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M3 7l3-3-3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" transform="rotate(90 5 5)"/></svg>
+                    <span>Vessels</span><span class="grp-count">3/3</span>
+                  </button>
+                  <div class="model-group-items">
+                    <button class="model-item is-on"><div class="swatch" style="background:#FF5F67"></div><span>Arteries</span><span class="opacity-mini">80%</span><svg class="eye" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 7s2-4 6-4 6 4 6 4-2 4-6 4-6-4-6-4z" stroke="currentColor" stroke-width="1.3"/><circle cx="7" cy="7" r="1.5" fill="currentColor"/></svg></button>
+                    <button class="model-item is-on"><div class="swatch" style="background:#789FD6"></div><span>Veins</span><span class="opacity-mini">80%</span><svg class="eye" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 7s2-4 6-4 6 4 6 4-2 4-6 4-6-4-6-4z" stroke="currentColor" stroke-width="1.3"/><circle cx="7" cy="7" r="1.5" fill="currentColor"/></svg></button>
+                    <button class="model-item is-on"><div class="swatch" style="background:#FEBD09"></div><span>Ureters</span><span class="opacity-mini">60%</span><svg class="eye" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 7s2-4 6-4 6 4 6 4-2 4-6 4-6-4-6-4z" stroke="currentColor" stroke-width="1.3"/><circle cx="7" cy="7" r="1.5" fill="currentColor"/></svg></button>
+                  </div>
+                </div>
+
+                <div class="model-group">
+                  <button class="model-group-header">
+                    <svg class="chev" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M3 7l3-3-3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" transform="rotate(90 5 5)"/></svg>
+                    <span>Organs</span><span class="grp-count">3/4</span>
+                  </button>
+                  <div class="model-group-items">
+                    <button class="model-item is-on"><div class="swatch" style="background:#FF5F67"></div><span>Left kidney</span><span class="opacity-mini">80%</span><svg class="eye" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 7s2-4 6-4 6 4 6 4-2 4-6 4-6-4-6-4z" stroke="currentColor" stroke-width="1.3"/><circle cx="7" cy="7" r="1.5" fill="currentColor"/></svg></button>
+                    <button class="model-item is-on"><div class="swatch" style="background:#C666C7"></div><span>Left collecting system</span><span class="opacity-mini">80%</span><svg class="eye" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 7s2-4 6-4 6 4 6 4-2 4-6 4-6-4-6-4z" stroke="currentColor" stroke-width="1.3"/><circle cx="7" cy="7" r="1.5" fill="currentColor"/></svg></button>
+                    <button class="model-item is-on"><div class="swatch" style="background:#DD8A7A"></div><span>Liver</span><span class="opacity-mini">70%</span><svg class="eye" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 7s2-4 6-4 6 4 6 4-2 4-6 4-6-4-6-4z" stroke="currentColor" stroke-width="1.3"/><circle cx="7" cy="7" r="1.5" fill="currentColor"/></svg></button>
+                    <button class="model-item"><div class="swatch" style="background:#90939A"></div><span>Pelvis</span><span class="opacity-mini">—</span><svg class="eye" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 7s2-4 6-4 6 4 6 4-2 4-6 4-6-4-6-4z" stroke="currentColor" stroke-width="1.3"/></svg></button>
+                  </div>
+                </div>
+
+                <div class="model-group">
+                  <button class="model-group-header">
+                    <svg class="chev" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M3 7l3-3-3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" transform="rotate(90 5 5)"/></svg>
+                    <span>Skeleton &amp; muscles</span><span class="grp-count">2/2</span>
+                  </button>
+                  <div class="model-group-items">
+                    <button class="model-item is-on"><div class="swatch" style="background:#F3F3F3"></div><span>Left femur</span><span class="opacity-mini">90%</span><svg class="eye" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 7s2-4 6-4 6 4 6 4-2 4-6 4-6-4-6-4z" stroke="currentColor" stroke-width="1.3"/><circle cx="7" cy="7" r="1.5" fill="currentColor"/></svg></button>
+                    <button class="model-item is-on"><div class="swatch" style="background:#DD8A7A"></div><span>Left iliopsoas muscle</span><span class="opacity-mini">50%</span><svg class="eye" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 7s2-4 6-4 6 4 6 4-2 4-6 4-6-4-6-4z" stroke="currentColor" stroke-width="1.3"/><circle cx="7" cy="7" r="1.5" fill="currentColor"/></svg></button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <div class="tp-block">
+              <div class="tp-row">
+                <span class="tp-label">Global transparency</span>
+                <span class="tp-val" id="tp-val">62%</span>
+              </div>
+              <div class="tp-slider" id="tp-slider">
+                <div class="fill" id="tp-fill"></div>
+                <div class="knob" id="tp-knob"></div>
+              </div>
+            </div>
+          </aside>
+
+          <!-- 4-pane viewport -->
+          <div class="viewport">
+            <div class="pane">
+              <span class="pane-label">Axial</span>
+              <button class="pane-expand" title="Espandi"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 4V1h3M8 1h3v3M11 8v3H8M4 11H1V8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              <span class="pane-meta">B31s · 2.0mm</span>
+              <div class="crosshair h"></div><div class="crosshair v"></div>
+              <div class="crosshair h red" style="top:38%"></div>
+              <div class="crosshair v green" style="left:50%"></div>
+              <div class="pane-content">
+                <svg width="240" height="240" viewBox="0 0 200 200" fill="none">
+                  <ellipse cx="100" cy="110" rx="80" ry="55" fill="#1a1a1a" stroke="#3a3a3a" stroke-width="1"/>
+                  <ellipse cx="65" cy="105" rx="14" ry="18" fill="#FF5F67" opacity=".4"/>
+                  <ellipse cx="135" cy="105" rx="14" ry="18" fill="#FF5F67" opacity=".4"/>
+                  <circle cx="100" cy="115" r="6" fill="#F3F3F3"/>
+                </svg>
+              </div>
+            </div>
+
+            <div class="pane">
+              <span class="pane-label">3D Render</span>
+              <button class="pane-expand" title="Espandi"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 4V1h3M8 1h3v3M11 8v3H8M4 11H1V8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              <span class="pane-meta">12 models</span>
+              <div class="anatomy">
+                <svg width="240" height="320" viewBox="0 0 200 280" class="anatomy-svg">
+                  <g opacity=".9">
+                    <path d="M100 30 L100 170" stroke="#5B6773" stroke-width="10" stroke-linecap="round"/>
+                    <g stroke="#5B6773" stroke-width="2.5" fill="none" opacity=".7">
+                      <path d="M100 60 Q60 70 55 95"/><path d="M100 60 Q140 70 145 95"/>
+                      <path d="M100 85 Q55 95 50 120"/><path d="M100 85 Q145 95 150 120"/>
+                    </g>
+                    <path d="M70 170 Q70 215 90 230 L100 240 L110 230 Q130 215 130 170" stroke="#5B6773" stroke-width="5" fill="none"/>
+                  </g>
+                  <ellipse cx="80" cy="115" rx="12" ry="22" fill="#FF5F67" opacity=".8"/>
+                  <ellipse cx="120" cy="115" rx="12" ry="22" fill="#FF5F67" opacity=".8"/>
+                  <g stroke="#00E6E6" stroke-width="2" fill="none" opacity=".8">
+                    <path d="M100 80 L100 170"/><path d="M100 110 L80 130"/><path d="M100 110 L120 130"/>
+                  </g>
+                </svg>
+              </div>
+            </div>
+
+            <div class="pane">
+              <span class="pane-label">Coronal</span>
+              <button class="pane-expand" title="Espandi"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 4V1h3M8 1h3v3M11 8v3H8M4 11H1V8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              <span class="pane-meta">B31s · 2.0mm</span>
+              <div class="crosshair h"></div><div class="crosshair v"></div>
+              <div class="pane-content">
+                <svg width="200" height="260" viewBox="0 0 200 220" fill="none">
+                  <ellipse cx="100" cy="110" rx="60" ry="90" fill="#1a1a1a" stroke="#3a3a3a" stroke-width="1"/>
+                  <path d="M95 30 L95 200 M105 30 L105 200" stroke="#F3F3F3" stroke-width="2"/>
+                  <ellipse cx="75" cy="90" rx="10" ry="22" fill="#FF5F67" opacity=".5"/>
+                  <ellipse cx="125" cy="90" rx="10" ry="22" fill="#FF5F67" opacity=".5"/>
+                </svg>
+              </div>
+            </div>
+
+            <div class="pane">
+              <span class="pane-label">Sagittal</span>
+              <button class="pane-expand" title="Espandi"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 4V1h3M8 1h3v3M11 8v3H8M4 11H1V8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              <span class="pane-meta">B31s · 2.0mm</span>
+              <div class="crosshair h"></div><div class="crosshair v"></div>
+              <div class="pane-content">
+                <svg width="180" height="280" viewBox="0 0 160 240" fill="none">
+                  <path d="M60 20 Q40 30 35 60 L30 200 Q35 220 60 225 L100 225 Q120 220 125 200 L120 60 Q115 30 100 20 Z" fill="#1a1a1a" stroke="#3a3a3a" stroke-width="1"/>
+                  <circle cx="78" cy="40" r="4" fill="#F3F3F3"/><circle cx="78" cy="60" r="4" fill="#F3F3F3"/>
+                  <circle cx="78" cy="80" r="4" fill="#F3F3F3"/><circle cx="78" cy="100" r="4" fill="#F3F3F3"/>
+                  <circle cx="78" cy="120" r="4" fill="#F3F3F3"/><circle cx="78" cy="140" r="4" fill="#F3F3F3"/>
+                  <circle cx="78" cy="160" r="4" fill="#F3F3F3"/><circle cx="78" cy="180" r="4" fill="#F3F3F3"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================ SCREEN 2: CALIBRATION ================ -->
+      <section class="screen" data-screen="calibration">
+        <div class="calib">
+
+          <!-- Stepper -->
+          <div class="stepper">
+            <div class="step is-done">
+              <div class="step-circle"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="step-label">Patient data</div>
+            </div>
+            <div class="step-connector is-done"></div>
+            <div class="step is-done">
+              <div class="step-circle"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="step-label">Endoscope</div>
+            </div>
+            <div class="step-connector is-done"></div>
+            <div class="step is-done">
+              <div class="step-circle"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="step-label">Workspace</div>
+            </div>
+            <div class="step-connector"></div>
+            <div class="step is-current">
+              <div class="step-circle">4</div>
+              <div class="step-label">Patient calibration</div>
+            </div>
+            <div class="step-connector"></div>
+            <div class="step">
+              <div class="step-circle">5</div>
+              <div class="step-label">Ready</div>
+            </div>
+          </div>
+
+          <!-- Stage -->
+          <div class="calib-stage">
+
+            <div class="pointer-status">
+              <div class="ico"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v4M6 8.5v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+              <div class="txt">Move pointer into camera view<small>Camera C · workspace 1.5m</small></div>
+            </div>
+
+            <div class="calib-anatomy">
+              <svg viewBox="0 0 320 480" class="anatomy-svg">
+                <g opacity=".9">
+                  <path d="M160 60 L160 280" stroke="#3a4756" stroke-width="14" stroke-linecap="round"/>
+                  <g stroke="#3a4756" stroke-width="3" fill="none" opacity=".7">
+                    <path d="M160 100 Q100 110 90 140"/><path d="M160 100 Q220 110 230 140"/>
+                    <path d="M160 130 Q90 140 80 175"/><path d="M160 130 Q230 140 240 175"/>
+                    <path d="M160 160 Q85 170 80 210"/><path d="M160 160 Q235 170 240 210"/>
+                    <path d="M160 190 Q90 200 90 235"/><path d="M160 190 Q230 200 230 235"/>
+                  </g>
+                  <path d="M100 280 Q100 340 130 360 L160 380 L190 360 Q220 340 220 280" stroke="#3a4756" stroke-width="6" fill="none"/>
+                  <path d="M130 360 L110 460" stroke="#3a4756" stroke-width="8" stroke-linecap="round"/>
+                  <path d="M190 360 L210 460" stroke="#3a4756" stroke-width="8" stroke-linecap="round"/>
+                </g>
+                <ellipse cx="125" cy="180" rx="18" ry="32" fill="#FF5F67" opacity=".75"/>
+                <ellipse cx="195" cy="180" rx="18" ry="32" fill="#FF5F67" opacity=".75"/>
+                <g stroke="#00E6E6" stroke-width="2" fill="none" opacity=".7">
+                  <path d="M160 130 L160 280"/><path d="M160 170 L130 200 L125 240"/><path d="M160 170 L190 200 L195 240"/>
+                </g>
+              </svg>
+
+              <div class="calib-points">
+                <div class="cp done" style="left:140px;top:80px"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <div class="cp done" style="left:260px;top:160px"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <div class="cp current" style="left:60px;top:200px">3</div>
+                <div class="cp" style="left:170px;top:340px">4</div>
+              </div>
+            </div>
+
+            <div class="calib-info">
+              <div class="calib-info-card">
+                <div class="lbl">Point 3 of 4</div>
+                <div class="ttl">Right iliac crest</div>
+                <div class="desc">Place pointer on the right iliac crest, then press the pedal to confirm.</div>
+                <div class="timer">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v6l4 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
+                  <span id="calib-timer">Waiting for pointer · 00:12</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Assistant -->
+            <aside class="assistant" id="assistant-panel">
+              <div class="ast-body">
+                <div class="ast-title">EVA Assistant</div>
+                <p class="ast-msg">Pick the highlighted anatomical points in order, using the pointer. Press the pedal to confirm each one.</p>
+                <div class="ast-actions">
+                  <button class="btn btn-primary btn-lg">Proceed</button>
+                  <button class="btn btn-ghost btn-lg">Skip</button>
+                </div>
+              </div>
+            </aside>
+
+          </div>
+
+          <!-- Footer -->
+          <div class="calib-footer">
+            <div class="calib-progress">
+              <div class="calib-progress-text">
+                <strong>2/4</strong> points captured
+                <span class="sub">Estimated 30s remaining</span>
+              </div>
+              <div class="calib-progress-bar"><div class="fill"></div></div>
+            </div>
+            <div></div>
+            <div class="calib-actions">
+              <button class="btn btn-secondary btn-lg">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 7H2l3-3M2 7l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 7h7a3 3 0 0 1 3 3" stroke="currentColor" stroke-width="1.5"/></svg>
+                Undo last point
+              </button>
+              <button class="btn btn-danger btn-lg">Cancel calibration</button>
+              <button class="btn btn-primary btn-lg">Continue →</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ============= MODAL: PATIENT DATA ============= -->
+<div class="modal-overlay" id="patient-modal">
+  <div class="form-modal">
+    <div class="form-modal-header">
+      <div class="ico">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="7" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M3 16a6 6 0 0 1 12 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div>
+        <div class="ttl">Patient data</div>
+        <div class="sub">Setup · Step 1 of 5</div>
+      </div>
+      <div style="margin-left:auto"><div class="pill pill-ok"><span class="dot"></span>2 patients</div></div>
+    </div>
+
+    <div class="form-modal-body">
+
+      <div>
+        <div class="panel-section-label" style="margin-bottom:10px">Patient list</div>
+        <div class="form-list">
+          <button class="form-list-item is-active"><span>202507-8077</span><span class="badge">Active</span></button>
+          <button class="form-list-item"><span>202508-5005</span><span class="badge">—</span></button>
+        </div>
+        <button class="btn btn-ghost btn-sm" style="margin-top:12px;width:100%;justify-content:center">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          New patient
+        </button>
+      </div>
+
+      <div>
+        <div class="form-fields">
+          <div class="input-group"><label class="input-label">Last name</label><input type="text" class="input" value="Pig"></div>
+          <div class="input-group"><label class="input-label">First name</label><input type="text" class="input" value="Peppa"></div>
+          <div class="input-group"><label class="input-label">Birthday</label><input type="text" class="input" value="01/01/1990"></div>
+          <div class="input-group"><label class="input-label">Age</label><input type="text" class="input" value="36"></div>
+          <div class="input-group full"><label class="input-label">Gender</label><div class="select">Female</div></div>
+          <div class="input-group"><label class="input-label">Physician</label><input type="text" class="input" value="Dr. Bianchi"></div>
+          <div class="input-group"><label class="input-label">Physician ID</label><input type="text" class="input" value="MD-49281"></div>
+
+          <div class="input-group full" style="margin-top:8px">
+            <label class="input-label">Diagnostic data</label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:var(--bg-2);border:1px solid var(--bd-default);border-radius:var(--r-md);padding:12px">
+              <button class="btn btn-secondary btn-sm">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4h8v6H2zM4 2v2M8 2v2" stroke="currentColor" stroke-width="1.5"/></svg>
+                Select DICOM
+              </button>
+              <div class="pill pill-ok"><span class="dot"></span>9 series loaded</div>
+              <button class="btn btn-secondary btn-sm" style="margin-left:12px">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1l5 3v4l-5 3-5-3V4z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+                Select models
+              </button>
+              <div class="pill pill-ok"><span class="dot"></span>12 models ready</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="form-modal-footer">
+      <div class="left">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M7 4v3.5M7 9.5v.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Required fields marked with *
+      </div>
+      <div class="right">
+        <button class="btn btn-ghost" data-close-modal>Cancel</button>
+        <button class="btn btn-primary" data-close-modal>Save &amp; continue</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+/* ============================================================
+   SCREEN SWITCHING
+   ============================================================ */
+const screens = document.querySelectorAll('.screen');
+const sidebarItems = document.querySelectorAll('.sidebar .sb-item');
+function setScreen(target){
+  screens.forEach(s => s.classList.toggle('is-active', s.dataset.screen === target));
+  sidebarItems.forEach(b => {
+    if (b.dataset.screen === target) b.classList.add('is-active');
+    else if (b.dataset.screen) b.classList.remove('is-active');
+  });
+}
+
+sidebarItems.forEach(b => {
+  if (b.dataset.screen) b.addEventListener('click', () => setScreen(b.dataset.screen));
+});
+
+/* ============================================================
+   PATIENT MODAL
+   ============================================================ */
+const patientModal = document.getElementById('patient-modal');
+document.querySelectorAll('[data-action="open-patient"]').forEach(b => {
+  b.addEventListener('click', () => patientModal.classList.add('is-open'));
+});
+document.querySelectorAll('[data-close-modal]').forEach(b => {
+  b.addEventListener('click', () => patientModal.classList.remove('is-open'));
+});
+patientModal.addEventListener('click', (e) => {
+  if (e.target === patientModal) patientModal.classList.remove('is-open');
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') patientModal.classList.remove('is-open');
+});
+
+/* ============================================================
+   2D / 3D TOGGLE
+   ============================================================ */
+document.querySelectorAll('.tb-toggle-23d button').forEach(b => {
+  b.addEventListener('click', () => {
+    b.parentElement.querySelectorAll('button').forEach(x => x.classList.remove('is-active'));
+    b.classList.add('is-active');
+  });
+});
+
+/* ============================================================
+   TOOL MARKERS
+   ============================================================ */
+document.querySelectorAll('.tb-marker').forEach(b => {
+  b.addEventListener('click', () => b.classList.toggle('is-active'));
+});
+
+/* ============================================================
+   ASSISTANT — toggle via topbar button
+   ============================================================ */
+const astToggle = document.getElementById('ast-toggle-top');
+const astPanel  = document.getElementById('assistant-panel');
+
+astToggle.addEventListener('click', () => {
+  const visible = astPanel.style.display !== 'none';
+  astPanel.style.display = visible ? 'none' : 'block';
+  astToggle.classList.toggle('is-on', !visible);
+});
+
+/* ============================================================
+   VIEWPORT — expand / collapse panes
+   ============================================================ */
+const EXPAND_ICON = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 4V1h3M8 1h3v3M11 8v3H8M4 11H1V8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const COLLAPSE_ICON = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4 1v3H1M11 4H8V1M8 11v-3h3M1 8h3v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+function collapseAllPanes(){
+  document.querySelectorAll('.pane').forEach(p => {
+    p.classList.remove('is-maximized');
+    p.querySelector('.pane-expand').innerHTML = EXPAND_ICON;
+  });
+  document.querySelectorAll('.viewport').forEach(v => v.classList.remove('has-maximized'));
+}
+
+document.querySelectorAll('.pane-expand').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const pane = btn.closest('.pane');
+    const viewport = pane.closest('.viewport');
+    const isMax = pane.classList.contains('is-maximized');
+    collapseAllPanes();
+    if (!isMax) {
+      pane.classList.add('is-maximized');
+      viewport.classList.add('has-maximized');
+      btn.innerHTML = COLLAPSE_ICON;
+      btn.title = 'Riduci';
+    }
+  });
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') collapseAllPanes();
+});
+
+/* ============================================================
+   DICOM — selezione
+   ============================================================ */
+document.querySelectorAll('#dicom-list .dicom-item').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('#dicom-list .dicom-item').forEach(x => x.classList.remove('is-active'));
+    b.classList.add('is-active');
+  });
+});
+
+/* ============================================================
+   MODELS — toggle visibility + collapse groups
+   ============================================================ */
+function updateModelsCount(){
+  const on = document.querySelectorAll('#models-tree .model-item.is-on').length;
+  const total = document.querySelectorAll('#models-tree .model-item').length;
+  document.getElementById('models-count').textContent = on;
+  // Update group counts
+  document.querySelectorAll('#models-tree .model-group').forEach(g => {
+    const items = g.querySelectorAll('.model-item');
+    const onCount = g.querySelectorAll('.model-item.is-on').length;
+    g.querySelector('.grp-count').textContent = `${onCount}/${items.length}`;
+  });
+}
+
+document.querySelectorAll('#models-tree .model-item').forEach(b => {
+  b.addEventListener('click', () => {
+    b.classList.toggle('is-on');
+    updateModelsCount();
+  });
+});
+
+document.querySelectorAll('#models-tree .model-group-header').forEach(b => {
+  b.addEventListener('click', () => b.parentElement.classList.toggle('is-collapsed'));
+});
+
+/* ============================================================
+   TRANSPARENCY SLIDER
+   ============================================================ */
+const slider = document.getElementById('tp-slider');
+const fill = document.getElementById('tp-fill');
+const knob = document.getElementById('tp-knob');
+const val = document.getElementById('tp-val');
+let dragging = false;
+
+function updateSlider(e){
+  const rect = slider.getBoundingClientRect();
+  let pct = ((e.clientX - rect.left) / rect.width) * 100;
+  pct = Math.max(0, Math.min(100, pct));
+  fill.style.width = pct + '%';
+  knob.style.left = pct + '%';
+  val.textContent = Math.round(pct) + '%';
+}
+slider.addEventListener('mousedown', (e) => { dragging = true; updateSlider(e); });
+document.addEventListener('mousemove', (e) => { if (dragging) updateSlider(e); });
+document.addEventListener('mouseup', () => { dragging = false; });
+
+
+/* ============================================================
+   LIVE CLOCK
+   ============================================================ */
+function tick(){
+  const d = new Date();
+  const hh = String(d.getHours()).padStart(2,'0');
+  const mm = String(d.getMinutes()).padStart(2,'0');
+  document.getElementById('clock').textContent = `${hh}:${mm}`;
+}
+tick(); setInterval(tick, 30000);
+
+/* ============================================================
+   CALIBRATION TIMER (counts up while on calibration)
+   ============================================================ */
+let calibSeconds = 12;
+setInterval(() => {
+  const calibActive = document.querySelector('.screen[data-screen="calibration"]').classList.contains('is-active');
+  if (!calibActive) return;
+  calibSeconds++;
+  const m = String(Math.floor(calibSeconds / 60)).padStart(2,'0');
+  const s = String(calibSeconds % 60).padStart(2,'0');
+  document.getElementById('calib-timer').textContent = `Waiting for pointer · ${m}:${s}`;
+}, 1000);
+
+</script>
+
+</body>
+</html>
