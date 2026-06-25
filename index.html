@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>EVA Navi 2.0</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- ================= TOPBAR ================= -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-name"><img src="assets/eva_logo.svg" alt="eva surgica" class="brand-logo"><small>NAVI / 2.0.0</small></div>
+    </div>
+
+    <div class="tb-sep"></div>
+
+    <div class="tb-patient">
+      <div class="name">Peppa Pig</div>
+      <div class="meta">ID 202507-8077 · 02 MAG 2026 · 14:26</div>
+    </div>
+
+    <div class="tb-right">
+      <!-- indicatori dispositivi -->
+      <div class="dev-cluster" id="devCluster" style="flex:none"></div>
+
+      <div class="tb-sep" style="margin:0 6px"></div>
+
+      <!-- tools -->
+      <div class="tb-group">
+        <span class="lab">Tools</span>
+        <div class="marker-row">
+          <div class="tb-marker is-active">C</div>
+          <div class="tb-marker">P</div>
+          <div class="tb-marker">E</div>
+        </div>
+      </div>
+
+      <div class="tb-sep" style="margin:0 6px"></div>
+
+      <!-- assistant -->
+      <button class="tb-icon" id="assistBtn" title="Eva">
+        <span class="ai-blob mini"><img class="knot-img" src="assets/eva_knot.webp" alt="Eva" draggable="false"></span>
+      </button>
+
+      <!-- turn off (rightmost) -->
+      <button class="tb-icon is-danger" id="powerBtn" title="Spegni">
+        <svg width="18" height="18" viewBox="0 0 16 16" fill="none"><path d="M8 2v6M4 4.5a5 5 0 1 0 8 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= SHELL ================= -->
+  <div class="shell">
+
+    <!-- SIDEBAR (labels kept; Settings added) -->
+    <nav class="sidebar">
+      <div class="sb-group">
+        <div class="sb-item is-active" data-view="patient">
+          <svg width="22" height="22" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="7" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M4 17a6 6 0 0 1 12 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <span>Patient</span>
+        </div>
+        <div class="sb-item" data-view="config">
+          <svg width="22" height="22" viewBox="0 0 20 20" fill="none"><path d="M10 2v3M10 15v3M2 10h3M15 10h3M4.5 4.5l2 2M13.5 13.5l2 2M4.5 15.5l2-2M13.5 6.5l2-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.5"/></svg>
+          <span>Config</span>
+        </div>
+      </div>
+
+      <div class="sb-divider" data-label="VIEWS"></div>
+
+      <div class="sb-group">
+        <div class="sb-item" data-view="cam">
+          <svg width="22" height="22" viewBox="0 0 20 20" fill="none"><rect x="3" y="6" width="11" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M14 9l3-2v6l-3-2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          <span>Cam</span>
+        </div>
+        <div class="sb-item" data-view="vr">
+          <svg width="22" height="22" viewBox="0 0 20 20" fill="none"><path d="M10 3l6 12H4z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          <span>VR</span>
+        </div>
+        <div class="sb-item" data-view="ar">
+          <svg width="22" height="22" viewBox="0 0 20 20" fill="none"><path d="M10 3l6 3.5v7L10 17l-6-3.5v-7z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 3v14M4 6.5l6 3.5 6-3.5" stroke="currentColor" stroke-width="1.5"/></svg>
+          <span>AR</span>
+        </div>
+      </div>
+
+      <div class="sb-bottom">
+        <div class="sb-item" data-view="system">
+          <svg width="22" height="22" viewBox="0 0 20 20" fill="none"><path d="M8.6 2.5h2.8l.35 1.9a6 6 0 0 1 1.55.9l1.8-.7 1.4 2.42-1.45 1.27a6 6 0 0 1 0 1.42l1.45 1.27-1.4 2.42-1.8-.7a6 6 0 0 1-1.55.9l-.35 1.9H8.6l-.35-1.9a6 6 0 0 1-1.55-.9l-1.8.7-1.4-2.42 1.45-1.27a6 6 0 0 1 0-1.42L3.05 7.92l1.4-2.42 1.8.7a6 6 0 0 1 1.55-.9z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><circle cx="10" cy="10" r="2.4" stroke="currentColor" stroke-width="1.3"/></svg>
+          <span>System</span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- STAGE -->
+    <main class="stage" id="stage">
+
+      <!-- ===== PATIENT (4-pane) ===== -->
+      <section class="view is-active with-panel" data-view="patient">
+        <aside class="panel" id="patientPanel">
+          <div class="panel-header">
+            <div class="ico"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="7" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M4 17a6 6 0 0 1 12 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+            <div class="panel-title">Patient Data<small>Peppa Pig · 202507-8077</small></div>
+            <button class="panel-action" id="openPatients" title="Seleziona paziente"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M3 5h8M3 9h8M3 13h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M14 6v6M11 9h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+          </div>
+
+          <div class="panel-section">
+            <div class="panel-section-label"><span>DICOM Series</span><span class="count">9</span></div>
+            <!-- list lives OUTSIDE any grey container -->
+            <div class="dicom-list">
+              <div class="dicom-item"><span class="seq">T20F</span>Topogram LL 0.6</div>
+              <div class="dicom-item"><span class="seq">T20F</span>Topogram AP 0.6</div>
+              <div class="dicom-item is-active"><span class="seq">B31s</span>TB mollio 2.0</div>
+              <div class="dicom-item"><span class="seq">B41s</span>PreMonitoring 10.0</div>
+              <div class="dicom-item"><span class="seq">B41s</span>PreMonitoring 10.0</div>
+              <div class="dicom-item"><span class="seq">B31s</span>Arteriosa 1.5</div>
+              <div class="dicom-item"><span class="seq">B31s</span>Venosa 1.5</div>
+              <div class="dicom-item"><span class="seq">B31s</span>Urografica 1.5</div>
+            </div>
+            <!-- the ONLY drag&drop affordance, clearly separated -->
+            <div class="dicom-drop">
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 11V3M5 6l3-3 3 3M3 13h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Trascina qui per importare una serie
+            </div>
+          </div>
+
+          <div class="panel-section">
+            <div class="panel-section-label"><span>3D Models</span><span class="count">12</span></div>
+            <div class="models-tree"></div>
+          </div>
+
+          <div class="tp-block">
+            <div class="tp-row"><span class="tp-label">Trasparenza globale</span><span class="tp-val">62%</span></div>
+            <div class="tp-slider"><div class="fill"></div><div class="knob"></div></div>
+          </div>
+        </aside>
+
+        <div class="viewport">
+          <div class="pane">
+            <span class="pane-label">Axial</span><span class="pane-meta">B31s · 2.0mm</span>
+            <div class="crosshair h green" style="top:50%"></div><div class="crosshair v green" style="left:50%"></div>
+            <div class="crosshair h red" style="top:38%"></div>
+            <svg class="scan" viewBox="0 0 240 200"><ellipse cx="120" cy="105" rx="95" ry="62" fill="#15191f" stroke="#3a4756"/><ellipse cx="78" cy="100" rx="16" ry="22" fill="#2b333d"/><ellipse cx="162" cy="100" rx="16" ry="22" fill="#2b333d"/><rect x="113" y="130" width="14" height="20" rx="3" fill="#3a4756"/><circle cx="120" cy="140" r="3" fill="#5a6675"/></svg>
+          </div>
+          <div class="pane">
+            <span class="pane-label">3D Render</span><span class="pane-meta">12 models</span>
+            <div class="vr-bg"></div>
+            <svg class="scan stage-anatomy" viewBox="0 0 240 200" style="position:relative;z-index:2;width:70%">
+              <path d="M120 30 L120 150" stroke="#e7c9a0" stroke-width="16" stroke-linecap="round"/>
+              <path d="M120 70 Q80 80 70 110M120 70 Q160 80 170 110" stroke="#C666C7" stroke-width="4" fill="none" opacity=".85"/>
+              <path d="M120 90 L95 120M120 90 L145 120" stroke="#789FD6" stroke-width="5" fill="none"/>
+              <ellipse cx="90" cy="120" rx="16" ry="24" fill="#b97f72" opacity=".8"/>
+              <ellipse cx="150" cy="120" rx="16" ry="24" fill="#b97f72" opacity=".8"/>
+              <path d="M105 95 L95 130M135 95 L145 130" stroke="#FEBD09" stroke-width="3" fill="none"/>
+            </svg>
+          </div>
+          <div class="pane">
+            <span class="pane-label">Coronal</span><span class="pane-meta">B31s · 2.0mm</span>
+            <div class="crosshair h red" style="top:75%"></div><div class="crosshair v" style="left:50%;background:rgba(120,159,214,.5)"></div>
+            <svg class="scan" viewBox="0 0 240 200"><rect x="113" y="20" width="14" height="160" rx="4" fill="#3a4756"/><ellipse cx="80" cy="90" rx="20" ry="30" fill="#2b333d"/><ellipse cx="160" cy="90" rx="20" ry="30" fill="#2b333d"/></svg>
+          </div>
+          <div class="pane">
+            <span class="pane-label">Sagittal</span><span class="pane-meta">B31s · 2.0mm</span>
+            <div class="crosshair h green" style="top:75%"></div><div class="crosshair v" style="left:50%;background:rgba(120,159,214,.5)"></div>
+            <svg class="scan" viewBox="0 0 240 200"><path d="M90 20 Q70 100 90 180" stroke="#3a4756" stroke-width="10" fill="none"/><ellipse cx="130" cy="100" rx="26" ry="34" fill="#2b333d"/></svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== CONFIG / SETUP (endoscope + live feed + launch calibration) ===== -->
+      <section class="view cfg" data-view="config">
+        <aside class="panel cfg-panel">
+          <div class="panel-header">
+            <div class="ico"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 2v3M10 15v3M2 10h3M15 10h3M4.5 4.5l2 2M13.5 13.5l2 2M4.5 15.5l2-2M13.5 6.5l2-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.5"/></svg></div>
+            <div class="panel-title">Configurazione<small>Strumenti e calibrazioni</small></div>
+          </div>
+
+          <div class="panel-section">
+            <div class="panel-section-label"><span>Strumenti</span></div>
+            <div class="field">
+              <label class="field-label">Endoscopio</label>
+              <div class="select" id="endoSelect">
+                <button class="select-trigger" id="endoTrigger"><span id="endoValue" class="is-empty">Nessuno selezionato</span><svg class="chev" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5l3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                <div class="select-menu" id="endoMenu">
+                  <button data-val="Olympus 4K 30°">Olympus 4K 30°</button>
+                  <button data-val="Stryker 1688 0°">Stryker 1688 0°</button>
+                  <button data-val="Karl Storz IMAGE1 S 45°">Karl Storz IMAGE1 S 45°</button>
+                </div>
+              </div>
+            </div>
+            <button class="disclosure" id="advToggle"><svg class="chev" width="11" height="11" viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Funzioni avanzate</button>
+            <div class="disclosure-body" id="advBody">
+              <div class="set-row"><div class="stack"><div class="ttl">White balance auto</div><div class="sub">Bilanciamento all'avvio</div></div><div class="toggle is-on"><div class="k"></div></div></div>
+              <div class="set-row"><div class="stack"><div class="ttl">Riduzione rumore</div><div class="sub">Filtro su feed live</div></div><div class="toggle"><div class="k"></div></div></div>
+            </div>
+          </div>
+
+          <div class="panel-section">
+            <div class="panel-section-label"><span>Calibrazioni</span></div>
+            <button class="calib-launch" data-go-calib><div class="cl-ic"><svg width="17" height="17" viewBox="0 0 18 18" fill="none"><rect x="2.5" y="2.5" width="13" height="13" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M6 9l2 2 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="cl-tx"><div class="cl-ttl">Inizia Calibrazione Workspace</div><div class="cl-sub">Allinea il volume di lavoro</div></div><svg class="cl-go" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <button class="calib-launch" data-go-calib><div class="cl-ic"><svg width="17" height="17" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="6" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 15.5a5.5 5.5 0 0 1 11 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div><div class="cl-tx"><div class="cl-ttl">Inizia Calibrazione Paziente</div><div class="cl-sub">Registra i punti anatomici</div></div><svg class="cl-go" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          </div>
+        </aside>
+
+        <div class="canvas-stage cfg-feed">
+          <span class="pane-label">Endoscopio · Live</span>
+          <div class="feed-nosignal" id="feedNoSignal">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M3 3l18 18M5 7v10a1 1 0 0 0 1 1h10M21 16V7a1 1 0 0 0-1-1H9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div class="ns-txt">No Signal</div>
+            <div class="ns-sub">Collega l'endoscopio e selezionalo a sinistra</div>
+          </div>
+        </div>
+
+        <!-- Assistant prompt (setup): select the endoscope -->
+        <div class="assistant show" id="cfgAssist">
+          <div class="ast-header">
+            <div class="ast-avatar ai-blob"><img class="knot-img" src="assets/eva_knot.webp" alt="Eva" draggable="false"></div>
+            <div><div class="ast-name">Eva</div></div>
+            <button class="ast-close" id="cfgAssistClose"><svg width="15" height="15" viewBox="0 0 14 14" fill="none"><path d="M3 7h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+          </div>
+          <div class="ast-body">
+            <div class="ast-kick">Passo 1</div>
+            <p class="ast-msg">Seleziona l'endoscopio per attivare il feed live, poi avvia la calibrazione.</p>
+            <div class="ast-actions"><button class="btn btn-primary" style="font-size:13px;padding:8px 14px" data-go-calib>Procedi</button><button class="btn btn-ghost" style="font-size:13px;padding:8px 14px" id="cfgAssistSkip">Salta</button></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== CALIBRATION (launched from Config) ===== -->
+      <section class="view calib" data-view="calib">
+        <div class="calib-main">
+          <div class="stepper" id="calibStepper">
+            <div class="step is-done"><div class="step-circle"><svg width="11" height="11" viewBox="0 0 10 10" fill="none"><path d="M2 5l2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div>Patient data</div></div>
+            <div class="step-connector is-done"></div>
+            <div class="step is-done"><div class="step-circle"><svg width="11" height="11" viewBox="0 0 10 10" fill="none"><path d="M2 5l2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div>Endoscope</div></div>
+            <div class="step-connector is-done"></div>
+            <div class="step is-done"><div class="step-circle"><svg width="11" height="11" viewBox="0 0 10 10" fill="none"><path d="M2 5l2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div>Workspace</div></div>
+            <div class="step-connector" id="stepConn4"></div>
+            <div class="step is-current" id="step4"><div class="step-circle">4</div><div>Patient calibration</div></div>
+            <div class="step-connector"></div>
+            <div class="step" id="step5"><div class="step-circle">5</div><div>Ready</div></div>
+          </div>
+
+          <div class="calib-stage2">
+            <!-- acquisition feedback: explicit acquiring state -->
+            <div class="acq" id="acq">
+              <div class="ring" id="acqRing"></div>
+              <div class="txt"><span id="acqMain">Acquisizione vista 3 di 4</span><small id="acqSub">tocca il punto evidenziato per acquisire</small></div>
+            </div>
+
+            <!-- quality scale: bars + icon + word -->
+            <div class="quality" id="quality" data-level="3">
+              <div class="kick">Qualità calibrazione</div>
+              <div class="q-bars"><div class="b"></div><div class="b"></div><div class="b"></div><div class="b"></div></div>
+              <div class="q-readout">
+                <div class="qi" id="qIcon"><svg width="15" height="15" viewBox="0 0 14 14" fill="none"><path d="M2 7l3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <div><div class="qv" id="qLabel">Ottimo</div><div class="qsub" id="qSub">puoi proseguire</div></div>
+              </div>
+            </div>
+
+            <div class="calib-anatomy">
+              <svg viewBox="0 0 320 480" width="100%" height="100%" preserveAspectRatio="none">
+                <g opacity=".9">
+                  <path d="M160 60 L160 280" stroke="#3a4756" stroke-width="14" stroke-linecap="round"/>
+                  <g stroke="#3a4756" stroke-width="3" fill="none" opacity=".7">
+                    <path d="M160 100 Q100 110 90 140"/><path d="M160 100 Q220 110 230 140"/>
+                    <path d="M160 130 Q90 140 80 175"/><path d="M160 130 Q230 140 240 175"/>
+                    <path d="M160 160 Q85 170 80 210"/><path d="M160 160 Q235 170 240 210"/>
+                  </g>
+                  <path d="M100 280 Q100 340 130 360 L160 380 L190 360 Q220 340 220 280" stroke="#3a4756" stroke-width="6" fill="none"/>
+                  <path d="M130 360 L110 460M190 360 L210 460" stroke="#3a4756" stroke-width="8" stroke-linecap="round"/>
+                </g>
+                <ellipse cx="125" cy="180" rx="18" ry="32" fill="#C666C7" opacity=".7"/>
+                <ellipse cx="195" cy="180" rx="18" ry="32" fill="#C666C7" opacity=".7"/>
+              </svg>
+              <div class="calib-points" id="calibPoints"></div>
+            </div>
+          </div>
+
+          <!-- bottom bar kept -->
+          <div class="calib-footer">
+            <div class="calib-progress">
+              <div class="calib-progress-text"><strong id="acqCount">2/4</strong> punti acquisiti<span class="sub" id="acqEta">~30s rimanenti</span></div>
+              <div class="calib-progress-bar"><div class="fill" id="acqBar"></div></div>
+            </div>
+            <div></div>
+            <div class="calib-actions">
+              <button class="btn btn-secondary btn-lg" id="undoPoint"><svg width="15" height="15" viewBox="0 0 14 14" fill="none"><path d="M4 7H2l3-3M2 7l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 7h7a3 3 0 0 1 3 3" stroke="currentColor" stroke-width="1.5"/></svg>Annulla ultimo punto</button>
+              <button class="btn btn-danger btn-lg" id="cancelCalib">Annulla calibrazione</button>
+              <!-- "Continue" → "Continue on patient" -->
+              <button class="btn btn-primary btn-lg" id="continuePatient">Continua sul paziente →</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SYSTEM (tabbed: devices + preferences) ===== -->
+      <section class="view" data-view="system">
+        <div class="pane-pad" style="display:block">
+          <div class="pane-head"><h2>System</h2></div>
+
+          <div class="settings-tabs">
+            <button class="stab is-active" data-tab="devices">Dispositivi</button>
+            <button class="stab" data-tab="general">Generale</button>
+            <button class="stab" data-tab="access">Accessibilità</button>
+            <button class="stab" data-tab="notif">Notifiche</button>
+            <button class="stab" data-tab="advanced">Avanzate</button>
+          </div>
+
+          <div class="settings-body">
+            <!-- DEVICES -->
+            <div class="stab-panel is-active" data-tab="devices">
+              <div class="settings-section">
+                <h3 class="settings-section-title">Dispositivi collegati</h3>
+                <div class="hw-grid" id="hwGrid"></div>
+              </div>
+            </div>
+
+            <!-- GENERAL -->
+            <div class="stab-panel" data-tab="general">
+              <div class="settings-section">
+                <h3 class="settings-section-title">Lingua e regione</h3>
+                <div class="pref-row">
+                  <div class="pref-row-label"><div class="ttl">Lingua interfaccia</div><div class="sub">Applicata a tutta la UI</div></div>
+                  <div class="pref-row-ctrl"><div class="seg"><button class="is-active">IT</button><button>EN</button><button>ES</button><button>DE</button></div></div>
+                </div>
+                <div class="pref-row">
+                  <div class="pref-row-label"><div class="ttl">Unità di misura</div><div class="sub">Distanze e volumi</div></div>
+                  <div class="pref-row-ctrl"><div class="seg"><button class="is-active">mm</button><button>cm</button></div></div>
+                </div>
+                <div class="pref-row">
+                  <div class="pref-row-label"><div class="ttl">Formato data</div><div class="sub">Giorno / mese / anno</div></div>
+                  <div class="pref-row-ctrl"><div class="seg"><button class="is-active">GG-MM-AAAA</button><button>MM-GG-AAAA</button></div></div>
+                </div>
+              </div>
+              <div class="settings-section">
+                <h3 class="settings-section-title">Aspetto</h3>
+                <div class="pref-row">
+                  <div class="pref-row-label"><div class="ttl">Modalità di visualizzazione</div><div class="sub">Render 2D o 3D predefinito</div></div>
+                  <div class="pref-row-ctrl"><div class="seg"><button class="is-active" data-dim="2D">2D</button><button data-dim="3D">3D</button></div></div>
+                </div>
+                <div class="pref-row">
+                  <div class="pref-row-label"><div class="ttl">Tema</div><div class="sub">Dark consigliato in sala</div></div>
+                  <div class="pref-row-ctrl"><div class="seg"><button class="is-active">Dark</button><button>Light</button></div></div>
+                </div>
+                <div class="pref-row">
+                  <div class="pref-row-label"><div class="ttl">Animazioni menù e transizioni</div><div class="sub">Disattiva per ridurre il movimento</div></div>
+                  <div class="pref-row-ctrl"><div class="toggle is-on"><div class="k"></div></div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ACCESSIBILITY -->
+            <div class="stab-panel" data-tab="access">
+              <div class="settings-section">
+                <h3 class="settings-section-title">Accessibilità colore</h3>
+                <div class="pref-row">
+                  <div class="pref-row-label"><div class="ttl">Preset daltonismo</div><div class="sub">Adatta la palette di stato mantenendo sempre icona ed etichetta accanto al colore.</div></div>
+                  <div class="pref-row-ctrl">
+                    <div class="cb-presets">
+                      <button class="cb-preset is-active">
+                        <div class="cb-swatches"><i style="background:#3CC505"></i><i style="background:#F19E14"></i><i style="background:#FF5F67"></i></div>
+                        <div class="cb-tx"><div class="cb-nm">Standard</div><div class="cb-sub">Nessuna correzione</div></div>
+                        <svg class="cb-chk" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      </button>
+                      <button class="cb-preset">
+                        <div class="cb-swatches"><i style="background:#0072B2"></i><i style="background:#E69F00"></i><i style="background:#CC79A7"></i></div>
+                        <div class="cb-tx"><div class="cb-nm">Deuteranopia</div><div class="cb-sub">Difficoltà sul verde</div></div>
+                        <svg class="cb-chk" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      </button>
+                      <button class="cb-preset">
+                        <div class="cb-swatches"><i style="background:#56B4E9"></i><i style="background:#F0E442"></i><i style="background:#D55E00"></i></div>
+                        <div class="cb-tx"><div class="cb-nm">Protanopia</div><div class="cb-sub">Difficoltà sul rosso</div></div>
+                        <svg class="cb-chk" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      </button>
+                      <button class="cb-preset">
+                        <div class="cb-swatches"><i style="background:#009E9E"></i><i style="background:#E69F00"></i><i style="background:#CC2E2E"></i></div>
+                        <div class="cb-tx"><div class="cb-nm">Tritanopia</div><div class="cb-sub">Difficoltà sul blu</div></div>
+                        <svg class="cb-chk" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="pref-row">
+                  <div class="pref-row-label"><div class="ttl">Alto contrasto</div><div class="sub">Bordi e testo più marcati</div></div>
+                  <div class="pref-row-ctrl"><div class="toggle"><div class="k"></div></div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- NOTIFICATIONS (checklist style) -->
+            <div class="stab-panel" data-tab="notif">
+              <div class="settings-section">
+                <h3 class="settings-section-title">Avvisi a schermo</h3>
+                <div class="pref-row">
+                  <div class="pref-row-label"><div class="ttl">Mostra un avviso quando</div></div>
+                  <div class="pref-row-ctrl">
+                    <label class="check is-on"><span class="box"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l2.5 2.5L10 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Il puntatore non è visibile</label>
+                    <label class="check is-on"><span class="box"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l2.5 2.5L10 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Una vista è stata acquisita</label>
+                    <label class="check"><span class="box"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l2.5 2.5L10 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>La calibrazione cala di qualità</label>
+                    <label class="check is-on"><span class="box"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l2.5 2.5L10 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Un dispositivo si scollega</label>
+                  </div>
+                </div>
+                <div class="pref-row">
+                  <div class="pref-row-label"><div class="ttl">Posizione e blocco</div></div>
+                  <div class="pref-row-ctrl">
+                    <label class="check is-on"><span class="box"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l2.5 2.5L10 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Warning in alto, non bloccanti</label>
+                    <label class="check is-on"><span class="box"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l2.5 2.5L10 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Errori al centro, richiedono conferma</label>
+                  </div>
+                </div>
+              </div>
+              <div class="settings-section">
+                <h3 class="settings-section-title">Suoni</h3>
+                <div class="pref-row">
+                  <div class="pref-row-label"><div class="ttl">Riproduci un suono quando</div></div>
+                  <div class="pref-row-ctrl">
+                    <label class="check"><span class="box"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l2.5 2.5L10 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Un punto viene acquisito</label>
+                    <label class="check is-on"><span class="box"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l2.5 2.5L10 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Viene mostrato un errore</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ADVANCED -->
+            <div class="stab-panel" data-tab="advanced">
+              <div class="settings-section">
+                <h3 class="settings-section-title">Funzioni avanzate <span class="badge">Operatore Eva</span></h3>
+                <div class="pref-row">
+                  <div class="pref-row-label"><div class="ttl">Parametri tracking grezzi</div><div class="sub">Debug puntatore e piastra</div></div>
+                  <div class="pref-row-ctrl"><div class="toggle"><div class="k"></div></div></div>
+                </div>
+                <div class="pref-row">
+                  <div class="pref-row-label"><div class="ttl">Log calibrazione</div><div class="sub">Export punti acquisiti</div></div>
+                  <div class="pref-row-ctrl"><div class="toggle"><div class="k"></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== VR ===== -->
+      <section class="view with-panel" data-view="vr">
+        <aside class="panel" id="vrPanel"></aside>
+        <div class="canvas-stage">
+          <span class="pane-label">VR Navigation</span>
+          <div class="vr-bg"></div>
+          <svg class="scan stage-anatomy" viewBox="0 0 240 200" style="width:75%">
+            <path d="M120 20 Q90 60 120 100 Q150 140 120 180" stroke="#e7c9a0" stroke-width="22" fill="none" stroke-linecap="round"/>
+            <path d="M40 60 Q90 90 140 70 Q190 50 210 90" stroke="#C666C7" stroke-width="7" fill="none"/>
+            <path d="M30 120 Q90 130 150 110" stroke="#C666C7" stroke-width="6" fill="none"/>
+            <path d="M120 40 Q120 100 120 170" stroke="#789FD6" stroke-width="14" fill="none" opacity=".9"/>
+            <ellipse cx="185" cy="110" rx="40" ry="44" fill="#7c4b43" opacity=".55"/>
+            <circle cx="195" cy="95" r="9" fill="#FEBD09" opacity=".8"/>
+          </svg>
+        </div>
+      </section>
+
+      <!-- ===== AR ===== -->
+      <section class="view with-panel" data-view="ar">
+        <aside class="panel" id="arPanel"></aside>
+        <div class="canvas-stage">
+          <span class="pane-label">AR Navigation</span>
+          <div class="ar-bg"></div>
+          <svg class="scan" viewBox="0 0 240 200" style="position:relative;z-index:2;width:80%;opacity:.78">
+            <path d="M30 70 Q90 60 140 90 Q190 120 215 100" stroke="#d35a3f" stroke-width="13" fill="none" stroke-linecap="round" opacity=".75"/>
+            <path d="M70 30 Q90 80 120 110 Q150 140 150 180" stroke="#FEBD09" stroke-width="12" fill="none" stroke-linecap="round" opacity=".7"/>
+            <path d="M50 130 Q100 120 130 150" stroke="#d35a3f" stroke-width="10" fill="none" opacity=".7"/>
+          </svg>
+        </div>
+      </section>
+
+      <!-- Cam fallback -->
+      <section class="view" data-view="cam">
+        <div class="canvas-stage" style="position:absolute;inset:0">
+          <span class="pane-label">Camera</span>
+          <div class="vr-bg"></div>
+          <div style="position:relative;z-index:2;color:var(--tx-tertiary);font-family:var(--f-mono);font-size:13px">Live camera feed</div>
+        </div>
+      </section>
+
+      <!-- ===== OVERLAYS ===== -->
+      <button class="immersive-exit" id="immersiveExit" title="Mostra interfaccia (Esc)">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 2v4H2M14 6h-4V2M6 14v-4H2M10 14v-4h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Esci da schermo intero
+      </button>
+
+      <div class="toast-stack" id="toastStack"></div>
+
+      <div class="overlay" id="overlay"><div id="dialogHost"></div></div>
+
+      <!-- Patient selection / management modal -->
+      <div class="overlay" id="patientsOverlay">
+        <div class="pt-modal">
+          <div class="pt-modal-head">
+            <div class="pt-head-ic"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="7" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M4 17a6 6 0 0 1 12 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+            <div class="pt-head-tx"><h3>Dati Paziente</h3><small>Setup</small></div>
+            <button class="ast-close" id="patientsClose"><svg width="15" height="15" viewBox="0 0 14 14" fill="none"><path d="M3.5 3.5l7 7M10.5 3.5l-7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+          </div>
+          <div class="pt-modal-body">
+            <!-- left: patient list (ID only, no names) -->
+            <div class="pt-list-col">
+              <div class="pt-col-label">Lista Pazienti <span class="pt-count">2</span></div>
+              <div class="pt-list" id="ptList">
+                <div class="pt-item"><div class="pt-id">202507-8077</div><button class="pt-remove" title="Rimuovi"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3.5 7h7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button></div>
+                <div class="pt-item is-active"><div class="pt-id">202606-5602</div><button class="pt-remove" title="Rimuovi"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3.5 7h7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button></div>
+              </div>
+              <button class="pt-new"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Nuovo Paziente</button>
+            </div>
+
+            <!-- center: patient form -->
+            <div class="pt-form-col">
+              <div class="pt-grid">
+                <div class="field"><label class="flbl">Cognome <span class="req">*</span></label><input class="inp" data-required type="text" placeholder="es. Patrizio"></div>
+                <div class="field"><label class="flbl">Nome <span class="req">*</span></label><input class="inp" data-required type="text" placeholder="es. Patrizio"></div>
+                <div class="field"><label class="flbl">Data di nascita <span class="req">*</span></label><input class="inp" data-required type="text" placeholder="01/01/1990"></div>
+                <div class="field"><label class="flbl">Età <span class="req">*</span></label><input class="inp" data-required type="text" placeholder="36"></div>
+                <div class="field pt-span"><label class="flbl">Sesso</label>
+                  <div class="radio-row">
+                    <label class="radio is-on"><span class="dot"></span>Maschio</label>
+                    <label class="radio"><span class="dot"></span>Femmina</label>
+                  </div>
+                </div>
+                <div class="field"><label class="flbl">Medico <span class="req">*</span></label><input class="inp" data-required type="text" placeholder="Dr. Bianchi"></div>
+                <div class="field"><label class="flbl">ID Medico</label><input class="inp" type="text" placeholder="MD-49281"></div>
+              </div>
+
+              <div class="pt-col-label" style="margin-top:24px">Dati Diagnostici</div>
+              <div class="pt-diag">
+                <button class="btn btn-secondary"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2l5 3v6l-5 3-5-3V5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>Seleziona DICOM</button>
+                <span class="pt-diag-state is-ok"><span class="dot"></span>9 caricate</span>
+                <button class="btn btn-secondary"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="2.5" y="4" width="11" height="8" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 8h6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Seleziona Modelli</button>
+                <span class="pt-diag-state is-ok"><span class="dot"></span>12 pronti</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-modal-foot">
+            <div class="pt-req-note"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.2" stroke="currentColor" stroke-width="1.4"/><path d="M8 5v3.5M8 10.5v.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Campi obbligatori contrassegnati con <span class="req">*</span></div>
+            <div style="flex:1"></div>
+            <button class="btn btn-ghost" id="ptCancel">Annulla</button>
+            <button class="btn btn-primary" id="ptSave">Salva e continua</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Assistant -->
+      <div class="assistant" id="assistant">
+        <div class="ast-header">
+          <div class="ast-avatar ai-blob"><img class="knot-img" src="assets/eva_knot.webp" alt="Eva" draggable="false"></div>
+          <div><div class="ast-name">Eva</div></div>
+          <button class="ast-close" id="astClose"><svg width="15" height="15" viewBox="0 0 14 14" fill="none"><path d="M3 7h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+        </div>
+        <div class="ast-body">
+          <div class="ast-kick">Suggerimento</div>
+          <p class="ast-msg">Scegli i punti anatomici evidenziati in ordine, con il puntatore. Premi il pedale per confermare ognuno.</p>
+          <div class="ast-actions"><button class="btn btn-primary" style="font-size:13px;padding:8px 14px">Ho capito</button><button class="btn btn-ghost" style="font-size:13px;padding:8px 14px">Salta</button></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>

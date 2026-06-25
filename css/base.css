@@ -1,0 +1,13 @@
+/* ======================================================================
+   EVA NAVI — BASE / RESET
+   Global resets, document defaults, reduced-motion.
+   ====================================================================== */
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:var(--bg-0);color:var(--tx-primary);
+  font-family:var(--f-sans);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased;
+  overflow:hidden;
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
