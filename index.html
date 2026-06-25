@@ -34,18 +34,6 @@
 
       <div class="tb-sep" style="margin:0 6px"></div>
 
-      <!-- tools -->
-      <div class="tb-group">
-        <span class="lab">Tools</span>
-        <div class="marker-row">
-          <div class="tb-marker is-active">C</div>
-          <div class="tb-marker">P</div>
-          <div class="tb-marker">E</div>
-        </div>
-      </div>
-
-      <div class="tb-sep" style="margin:0 6px"></div>
-
       <!-- assistant -->
       <button class="tb-icon" id="assistBtn" title="Eva">
         <span class="ai-blob mini"><img class="knot-img" src="assets/eva_knot.webp" alt="Eva" draggable="false"></span>
@@ -94,7 +82,7 @@
       <div class="sb-bottom">
         <div class="sb-item" data-view="system">
           <svg width="22" height="22" viewBox="0 0 20 20" fill="none"><path d="M8.6 2.5h2.8l.35 1.9a6 6 0 0 1 1.55.9l1.8-.7 1.4 2.42-1.45 1.27a6 6 0 0 1 0 1.42l1.45 1.27-1.4 2.42-1.8-.7a6 6 0 0 1-1.55.9l-.35 1.9H8.6l-.35-1.9a6 6 0 0 1-1.55-.9l-1.8.7-1.4-2.42 1.45-1.27a6 6 0 0 1 0-1.42L3.05 7.92l1.4-2.42 1.8.7a6 6 0 0 1 1.55-.9z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><circle cx="10" cy="10" r="2.4" stroke="currentColor" stroke-width="1.3"/></svg>
-          <span>System</span>
+          <span>Settings</span>
         </div>
       </div>
     </nav>
@@ -304,27 +292,18 @@
       <!-- ===== SYSTEM (tabbed: devices + preferences) ===== -->
       <section class="view" data-view="system">
         <div class="pane-pad" style="display:block">
-          <div class="pane-head"><h2>System</h2></div>
+          <div class="pane-head"><h2>Settings</h2></div>
 
           <div class="settings-tabs">
-            <button class="stab is-active" data-tab="devices">Dispositivi</button>
-            <button class="stab" data-tab="general">Generale</button>
+            <button class="stab is-active" data-tab="general">Generale</button>
             <button class="stab" data-tab="access">Accessibilità</button>
             <button class="stab" data-tab="notif">Notifiche</button>
             <button class="stab" data-tab="advanced">Avanzate</button>
           </div>
 
           <div class="settings-body">
-            <!-- DEVICES -->
-            <div class="stab-panel is-active" data-tab="devices">
-              <div class="settings-section">
-                <h3 class="settings-section-title">Dispositivi collegati</h3>
-                <div class="hw-grid" id="hwGrid"></div>
-              </div>
-            </div>
-
             <!-- GENERAL -->
-            <div class="stab-panel" data-tab="general">
+            <div class="stab-panel is-active" data-tab="general">
               <div class="settings-section">
                 <h3 class="settings-section-title">Lingua e regione</h3>
                 <div class="pref-row">
@@ -365,22 +344,22 @@
                   <div class="pref-row-label"><div class="ttl">Preset daltonismo</div><div class="sub">Adatta la palette di stato mantenendo sempre icona ed etichetta accanto al colore.</div></div>
                   <div class="pref-row-ctrl">
                     <div class="cb-presets">
-                      <button class="cb-preset is-active">
+                      <button class="cb-preset is-active" data-cb="">
                         <div class="cb-swatches"><i style="background:#3CC505"></i><i style="background:#F19E14"></i><i style="background:#FF5F67"></i></div>
                         <div class="cb-tx"><div class="cb-nm">Standard</div><div class="cb-sub">Nessuna correzione</div></div>
                         <svg class="cb-chk" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
                       </button>
-                      <button class="cb-preset">
+                      <button class="cb-preset" data-cb="cb-deuter">
                         <div class="cb-swatches"><i style="background:#0072B2"></i><i style="background:#E69F00"></i><i style="background:#CC79A7"></i></div>
                         <div class="cb-tx"><div class="cb-nm">Deuteranopia</div><div class="cb-sub">Difficoltà sul verde</div></div>
                         <svg class="cb-chk" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
                       </button>
-                      <button class="cb-preset">
+                      <button class="cb-preset" data-cb="cb-protan">
                         <div class="cb-swatches"><i style="background:#56B4E9"></i><i style="background:#F0E442"></i><i style="background:#D55E00"></i></div>
                         <div class="cb-tx"><div class="cb-nm">Protanopia</div><div class="cb-sub">Difficoltà sul rosso</div></div>
                         <svg class="cb-chk" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
                       </button>
-                      <button class="cb-preset">
+                      <button class="cb-preset" data-cb="cb-tritan">
                         <div class="cb-swatches"><i style="background:#009E9E"></i><i style="background:#E69F00"></i><i style="background:#CC2E2E"></i></div>
                         <div class="cb-tx"><div class="cb-nm">Tritanopia</div><div class="cb-sub">Difficoltà sul blu</div></div>
                         <svg class="cb-chk" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>

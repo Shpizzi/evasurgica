@@ -1,17 +1,5 @@
 /* EVA NAVI — application logic */
 /* ---------- device cluster: unified colorblind-safe chips ---------- */
-const ICONS = {
-  cam:'<svg width="17" height="17" viewBox="0 0 18 18" fill="none"><rect x="2" y="5" width="10" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M12 8l4-2v6l-4-2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>',
-  track:'<svg width="17" height="17" viewBox="0 0 18 18" fill="none"><path d="M9 2v3M9 13v3M2 9h3M13 9h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="9" cy="9" r="3" stroke="currentColor" stroke-width="1.5"/></svg>',
-  pedal:'<svg width="17" height="17" viewBox="0 0 18 18" fill="none"><rect x="3" y="6" width="12" height="7" rx="3.5" stroke="currentColor" stroke-width="1.5"/><path d="M6 9.5h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
-  mouse:'<svg width="17" height="17" viewBox="0 0 18 18" fill="none"><rect x="5" y="2" width="8" height="14" rx="4" stroke="currentColor" stroke-width="1.5"/><path d="M9 5v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>'
-};
-const STATE_ICON = {
-  ok:'<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-  visible:'<svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M1 7s2-4 6-4 6 4 6 4-2 4-6 4-6-4-6-4z" stroke="currentColor" stroke-width="1.4"/><circle cx="7" cy="7" r="1.6" fill="currentColor"/></svg>',
-  hidden:'<svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2 4s2 4 5 4 5-4 5-4M4 8l-1 2M10 8l1 2M7 9v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
-  off:'<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'
-};
 /* topbar pills: dot color + background tint per state.
    Each chip is clickable and surfaces its current status as a toast. */
 const devices = [
@@ -30,20 +18,6 @@ devCluster.querySelectorAll('.dev-chip').forEach(chip=>chip.addEventListener('cl
   const d = devices[+chip.dataset.dev];
   topToast(d.toast, d.title, d.msg);
 }));
-
-/* System detail cards reuse same model */
-const sysDevices = [
-  {glyph:'track', name:'Tracker (puntatore + piastra)', desc:'Stati: spento · collegato non visibile · visibile', state:'warn', word:'Non visibile', si:'hidden'},
-  {glyph:'cam',   name:'Camera', desc:'Stati: collegata · scollegata', state:'ok', word:'Collegata', si:'ok'},
-  {glyph:'pedal', name:'Pedale', desc:'Stati: collegato · scollegato', state:'ok', word:'Collegato', si:'ok'},
-  {glyph:'mouse', name:'Space Mouse', desc:'Stati: collegato · scollegato', state:'err', word:'Scollegato', si:'off'}
-];
-document.getElementById('hwGrid').innerHTML = sysDevices.map(d=>`
-  <div class="hw-card s-${d.state}">
-    <div class="ico">${ICONS[d.glyph]}</div>
-    <div class="info"><div class="nm">${d.name}</div><div class="desc">${d.desc}</div></div>
-    <div class="hw-state"><span class="si">${STATE_ICON[d.si]}</span>${d.word}</div>
-  </div>`).join('');
 
 /* ---------- 3D models panel: data-driven, per-element transparency ---------- */
 /* single source of truth — visibility + opacity live here, every visual
@@ -425,9 +399,13 @@ document.querySelectorAll('.stab').forEach(t=>t.addEventListener('click',()=>{
 /* checkbox rows */
 document.querySelectorAll('.check').forEach(c=>c.addEventListener('click',()=>c.classList.toggle('is-on')));
 
-/* colorblind preset selector (single active) */
+/* colorblind preset selector (single active) — remaps semantic status palette */
+const CB_PRESETS=['cb-deuter','cb-protan','cb-tritan'];
 document.querySelectorAll('.cb-preset').forEach(b=>b.addEventListener('click',()=>{
   b.parentElement.querySelectorAll('.cb-preset').forEach(x=>x.classList.remove('is-active'));b.classList.add('is-active');
+  document.documentElement.classList.remove(...CB_PRESETS);
+  const preset=b.dataset.cb;
+  if(preset) document.documentElement.classList.add(preset);
 }));
 
 /* VR visualization mode selector */

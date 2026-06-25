@@ -19,9 +19,9 @@
   --acc-yellow:#FEBD09; --acc-yellow-tint:rgba(254,189,9,.14);
   --acc-salmon:#DD8A7A; --acc-salmon-tint:rgba(221,138,122,.14);
 
-  --ok:#3CC505; --ok-tint:rgba(60,197,5,.14);
-  --warn:#F19E14; --warn-tint:rgba(241,158,20,.14);
-  --danger:#FF5F67; --danger-tint:rgba(255,95,103,.14);
+  --ok:#3CC505; --ok-tint:color-mix(in srgb,#3CC505 14%,transparent);
+  --warn:#F19E14; --warn-tint:color-mix(in srgb,#F19E14 14%,transparent);
+  --danger:#FF5F67; --danger-tint:color-mix(in srgb,#FF5F67 14%,transparent);
   --neutral:#90939A; --neutral-tint:rgba(144,147,154,.14);
 
   --brand-gradient:linear-gradient(135deg,var(--brand) 0%,var(--brand-blue) 50%,var(--brand-magenta) 100%);
@@ -31,4 +31,37 @@
 
   --r-sm:5px; --r-md:8px; --r-lg:12px; --r-xl:16px;
   --sh-1:0 1px 2px rgba(0,0,0,.4); --sh-2:0 4px 12px rgba(0,0,0,.4); --sh-3:0 12px 32px rgba(0,0,0,.55);
+}
+
+/* ======================================================================
+   COLORBLIND PRESETS — remap ONLY the semantic status palette
+   (--ok / --warn / --danger). Brand colours stay untouched so the
+   product keeps its identity; tints/borders/glows derive from these
+   via color-mix() and follow automatically. Okabe-Ito safe hues.
+   ====================================================================== */
+
+/* Tints are redefined with LITERAL colours (not via var) because a
+   color-mix() that references var(--ok) inside a :root custom property
+   does not re-resolve when --ok is overridden lower in the cascade. */
+
+/* Deuteranopia — verde difficile: ok→blu, warn→ambra, danger→magenta */
+html.cb-deuter{
+  --ok:#0072B2; --warn:#E69F00; --danger:#CC79A7;
+  --ok-tint:color-mix(in srgb,#0072B2 14%,transparent);
+  --warn-tint:color-mix(in srgb,#E69F00 14%,transparent);
+  --danger-tint:color-mix(in srgb,#CC79A7 14%,transparent);
+}
+/* Protanopia — rosso difficile: ok→azzurro, warn→giallo, danger→vermiglio */
+html.cb-protan{
+  --ok:#56B4E9; --warn:#F0E442; --danger:#D55E00;
+  --ok-tint:color-mix(in srgb,#56B4E9 14%,transparent);
+  --warn-tint:color-mix(in srgb,#F0E442 14%,transparent);
+  --danger-tint:color-mix(in srgb,#D55E00 14%,transparent);
+}
+/* Tritanopia — blu difficile: ok→teal (vicino al brand), danger→rosso saturo */
+html.cb-tritan{
+  --ok:#009E9E; --warn:#E69F00; --danger:#CC2E2E;
+  --ok-tint:color-mix(in srgb,#009E9E 14%,transparent);
+  --warn-tint:color-mix(in srgb,#E69F00 14%,transparent);
+  --danger-tint:color-mix(in srgb,#CC2E2E 14%,transparent);
 }
